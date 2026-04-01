@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { format } from 'date-fns';
+
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Heart, User, Clock, FileText, ChevronRight, X, Phone, Mail } from 'lucide-react';
+import { Search, Heart, Clock, FileText, X, Phone, Mail } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
 import type { BookingData } from '../stores/useBookingStore';
 

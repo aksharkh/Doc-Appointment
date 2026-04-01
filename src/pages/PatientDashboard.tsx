@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HeartPulse, ArrowRight, ShieldCheck, Mail, Calendar, Clock, MapPin, XCircle } from 'lucide-react';
+import { HeartPulse, ShieldCheck, Mail, Calendar, Clock, MapPin, XCircle } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
 
 export default function PatientDashboard() {

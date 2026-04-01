@@ -8,7 +8,7 @@ import type { BookingStatus } from '../stores/useBookingStore';
 
 export default function AdminDashboard() {
   const { bookings, adminBlockedSlots, toggleAdminBlockSlot, updateBookingStatus, updateTelehealthLink, updateBookingRoomAndToken } = useBookingStore();
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<'slots' | 'analytics'>('slots');
   const [telehealthInputs, setTelehealthInputs] = useState<Record<string, string>>({});
   

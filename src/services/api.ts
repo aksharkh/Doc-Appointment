@@ -34,7 +34,7 @@ export const generateSlotsForDate = async (date: Date): Promise<Slot[]> => {
   return slots;
 };
 
-export const submitBooking = async (data: BookingData): Promise<{success: boolean, id: string}> => {
+export const submitBooking = async (_data: BookingData): Promise<{success: boolean, id: string}> => {
   await new Promise(resolve => setTimeout(resolve, 1500));
   
   // Later we integrate Google Apps Script Web App here

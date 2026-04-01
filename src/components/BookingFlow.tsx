@@ -4,7 +4,7 @@ import { format, addDays, isWeekend, isToday } from 'date-fns';
 import { useBookingStore } from '../stores/useBookingStore';
 import type { BookingData, Slot, ConsultationType } from '../stores/useBookingStore';
 import Ticket from './Ticket';
-import { ChevronRight, Calendar as CalendarIcon, Clock, Loader2, ArrowLeft, Stethoscope, Video, User, Building, ShieldCheck } from 'lucide-react';
+import { ChevronRight, Calendar as CalendarIcon, Clock, Loader2, ArrowLeft, Stethoscope, Video, Building, ShieldCheck } from 'lucide-react';
 
 type Step = 'triage' | 'date' | 'slot' | 'details' | 'ticket';
 

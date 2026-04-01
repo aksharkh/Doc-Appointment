@@ -1,4 +1,4 @@
-import { ShieldAlert, Clock, Settings2, Download } from 'lucide-react';
+import { ShieldAlert, Settings2, Download } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
 
 export default function AdminSettings() {

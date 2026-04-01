@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Pill, CheckCheck, Clock, AlertCircle } from 'lucide-react';
+import { Pill, CheckCheck, Clock } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
-import type { BookingData, Prescription, RxStatus } from '../stores/useBookingStore';
+import type { BookingData, Prescription } from '../stores/useBookingStore';
 import { format } from 'date-fns';
 
 export default function AdminPharmacy() {

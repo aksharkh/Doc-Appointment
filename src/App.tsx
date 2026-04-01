@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Home } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import BookingFlow from './components/BookingFlow';
 import AdminLayout from './layouts/AdminLayout';
 import AdminLogin from './pages/AdminLogin';

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Stethoscope, HeartPulse, Pill, BotMessageSquare, Save, CalendarPlus, CheckCircle2, ChevronRight, Activity, Beaker } from 'lucide-react';
+import { ArrowLeft, Stethoscope, HeartPulse, Pill, BotMessageSquare, Save, CheckCircle2, Activity, Beaker } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
-import type { BookingData, Prescription, RxStatus } from '../stores/useBookingStore';
+import type { BookingData, Prescription } from '../stores/useBookingStore';
 
 const MOCK_AI_RESPONSES: Record<string, string[]> = {
   general: ['Consider ordering a CBC and metabolic panel.', 'Differential includes viral URI vs simple allergies based on recent history.', 'Review recent blood pressure trends.'],
@@ -18,7 +18,7 @@ export default function AdminEncounter() {
   const { bookings, updateClinicalEncounter, updateBookingStatus, addBooking } = useBookingStore();
   
   const patientMatch = bookings.find(b => b.id === id);
-  const [patient, setPatient] = useState<BookingData | null>(patientMatch || null);
+  const [patient] = useState<BookingData | null>(patientMatch || null);
   
   // Local active states
   const [activeTab, setActiveTab] = useState<'notes'|'vitals'|'rx'|'ai' | 'lab'>('notes');
