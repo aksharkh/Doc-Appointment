@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Heart, Clock, FileText, X, Phone, Mail, Activity, AlertTriangle, Save } from 'lucide-react';
+import { Search, Heart, Clock, FileText, X, Phone, Mail, Activity, AlertTriangle, Save, Loader2 } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
 import type { BookingData } from '../stores/useBookingStore';
 
@@ -13,6 +13,9 @@ export default function AdminPatients() {
   const [activeTab, setActiveTab] = useState<'history'|'profile'|'vitals'>('history');
   const [editAllergies, setEditAllergies] = useState('');
   const [editConditions, setEditConditions] = useState('');
+  
+  const [activePatientHistory, setActivePatientHistory] = useState<BookingData[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   // Group bookings by unique email to form a "patient"
   const uniquePatients = useMemo(() => {
@@ -28,21 +31,43 @@ export default function AdminPatients() {
     );
   }, [bookings, searchTerm]);
 
-  const openPatientModal = (patient: BookingData) => {
+  // Helper to get visit count from local cached bookings
+  const getVisitCount = (email: string) => {
+    return bookings.filter(b => b.email === email).length;
+  };
+
+  const openPatientModal = async (patient: BookingData) => {
      setActivePatient(patient);
      setEditAllergies(patient.allergies?.join(', ') || '');
      setEditConditions(patient.chronicConditions?.join(', ') || '');
      setActiveTab('history');
+     
+     // Fetch full history from server
+     setLoadingHistory(true);
+     try {
+        const history = await getPatientHistory(patient.email);
+        setActivePatientHistory(history);
+     } catch (err) {
+        console.error("Failed to fetch history", err);
+        // Fallback to local filtering if server fetch fails
+        setActivePatientHistory(bookings.filter(b => b.email === patient.email));
+     } finally {
+        setLoadingHistory(false);
+     }
   };
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
       if(!activePatient) return;
       const allergies = editAllergies.split(',').map(s=>s.trim()).filter(Boolean);
       const conditions = editConditions.split(',').map(s=>s.trim()).filter(Boolean);
-      updatePatientProfile(activePatient.email, { allergies, chronicConditions: conditions });
       
-      // Update local state to reflect instantly in modal
-      setActivePatient({...activePatient, allergies, chronicConditions: conditions});
+      try {
+        await updatePatientProfile(activePatient.email, { allergies, chronicConditions: conditions });
+        // Update local state to reflect instantly in modal
+        setActivePatient({...activePatient, allergies, chronicConditions: conditions});
+      } catch (err) {
+        alert("Failed to update profile.");
+      }
   }
 
   return (
@@ -68,7 +93,7 @@ export default function AdminPatients() {
        {/* Patient Grid */}
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {uniquePatients.map((patient) => {
-             const history = getPatientHistory(patient.email);
+             const vCount = getVisitCount(patient.email);
              return (
                <div 
                  key={patient.id} 
@@ -81,7 +106,7 @@ export default function AdminPatients() {
                      </div>
                      <div>
                         <h3 className="font-bold text-white group-hover:text-emerald-300 transition-colors">{patient.name}</h3>
-                        <p className="text-xs text-zinc-500">{history.length} Visit{history.length > 1 ? 's' : ''} on record</p>
+                        <p className="text-xs text-zinc-500">{vCount} Visit{vCount !== 1 ? 's' : ''} on record</p>
                      </div>
                   </div>
                   
@@ -169,32 +194,40 @@ export default function AdminPatients() {
 
                            <div>
                               <h3 className="text-lg font-bold text-white mb-4">Historical Visits Log</h3>
-                              <div className="space-y-3">
-                                 {getPatientHistory(activePatient.email).map((visit, i) => (
-                                    <div key={i} className="flex flex-col gap-2 p-4 bg-zinc-800/30 border border-white/5 rounded-xl text-sm relative group">
-                                       <div className="flex items-center justify-between">
-                                          <div className="flex items-center gap-2">
-                                             <Clock className="w-4 h-4 text-blue-400" />
-                                             <span className="font-bold text-zinc-200">{visit.date} at {visit.time}</span>
+                              {loadingHistory ? (
+                                 <div className="flex flex-col items-center justify-center py-10">
+                                    <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
+                                    <p className="text-zinc-500 text-sm">Syncing records...</p>
+                                 </div>
+                              ) : (
+                                 <div className="space-y-3">
+                                    {activePatientHistory.map((visit, i) => (
+                                       <div key={i} className="flex flex-col gap-2 p-4 bg-zinc-800/30 border border-white/5 rounded-xl text-sm relative group">
+                                          <div className="flex items-center justify-between">
+                                             <div className="flex items-center gap-2">
+                                                <Clock className="w-4 h-4 text-blue-400" />
+                                                <span className="font-bold text-zinc-200">{visit.date} at {visit.time}</span>
+                                             </div>
+                                             <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider
+                                                ${visit.status === 'completed' ? 'bg-zinc-700 text-zinc-300' : 
+                                                  visit.status === 'no_show' ? 'bg-red-500/20 text-red-500' : 
+                                                  visit.status === 'in_session' ? 'bg-blue-500/20 text-blue-400' :
+                                                  'bg-emerald-500/20 text-emerald-400'
+                                                }
+                                             `}>
+                                                {visit.status.replace('_', ' ')}
+                                             </span>
                                           </div>
-                                          <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider
-                                             ${visit.status === 'completed' ? 'bg-zinc-700 text-zinc-300' : 
-                                               visit.status === 'no_show' ? 'bg-red-500/20 text-red-500' : 
-                                               visit.status === 'in_session' ? 'bg-blue-500/20 text-blue-400' :
-                                               'bg-emerald-500/20 text-emerald-400'
-                                             }
-                                          `}>
-                                             {visit.status.replace('_', ' ')}
-                                          </span>
+                                          <div className="pl-6 border-l-2 border-zinc-800 ml-[7px] py-1 space-y-1">
+                                             <p className="text-zinc-400"><strong className="text-zinc-300 font-medium">Type:</strong> {visit.type === 'telehealth' ? '💻 Telehealth' : '🏥 In-person'} ({visit.specialty})</p>
+                                             <p className="text-zinc-400"><strong className="text-zinc-300 font-medium">Reason:</strong> {visit.reason || 'Routine'}</p>
+                                             <p className="text-zinc-400"><strong className="text-zinc-300 font-medium">Physician:</strong> {visit.doctorAssigned || 'Triage Assigned'}</p>
+                                          </div>
                                        </div>
-                                       <div className="pl-6 border-l-2 border-zinc-800 ml-[7px] py-1 space-y-1">
-                                          <p className="text-zinc-400"><strong className="text-zinc-300 font-medium">Type:</strong> {visit.type === 'telehealth' ? '💻 Telehealth' : '🏥 In-person'} ({visit.specialty})</p>
-                                          <p className="text-zinc-400"><strong className="text-zinc-300 font-medium">Reason:</strong> {visit.reason || 'Routine'}</p>
-                                          <p className="text-zinc-400"><strong className="text-zinc-300 font-medium">Physician:</strong> {visit.doctorAssigned || 'Triage Assigned'}</p>
-                                       </div>
-                                    </div>
-                                 ))}
-                              </div>
+                                    ))}
+                                    {activePatientHistory.length === 0 && <p className="text-zinc-500 italic text-center py-4">No records found.</p>}
+                                 </div>
+                              )}
                            </div>
                         </div>
                      )}
@@ -233,10 +266,10 @@ export default function AdminPatients() {
                            </div>
 
                            <button 
-                              onClick={handleSaveProfile}
-                              className="w-full px-6 py-4 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold rounded-xl transition-colors mt-4 flex justify-center items-center gap-2"
+                               onClick={handleSaveProfile}
+                               className="w-full px-6 py-4 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold rounded-xl transition-colors mt-4 flex justify-center items-center gap-2"
                            >
-                              <Save className="w-5 h-5" /> Save CRM Profile
+                               <Save className="w-5 h-5" /> Save CRM Profile
                            </button>
                         </div>
                      )}
@@ -249,46 +282,55 @@ export default function AdminPatients() {
                            </div>
                            
                            <div className="space-y-3">
-                              {getPatientHistory(activePatient.email)
-                                 .filter(v => v.vitals && Object.values(v.vitals).some(val => val !== ''))
-                                 .map((visit, i) => (
-                                    <div key={i} className="bg-zinc-950 border border-white/5 rounded-xl p-4">
-                                       <div className="text-sm font-bold text-zinc-500 mb-3 uppercase tracking-widest border-b border-white/5 pb-2">
-                                          {visit.date}
-                                       </div>
-                                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                          {visit.vitals?.bp && (
-                                             <div>
-                                                <p className="text-xs text-zinc-500 font-medium">BP</p>
-                                                <p className="text-red-400 font-mono font-bold text-lg">{visit.vitals.bp}</p>
-                                             </div>
-                                          )}
-                                          {visit.vitals?.hr && (
-                                             <div>
-                                                <p className="text-xs text-zinc-500 font-medium">HR</p>
-                                                <p className="text-amber-400 font-mono font-bold text-lg">{visit.vitals.hr} <span className="text-xs text-zinc-600">bpm</span></p>
-                                             </div>
-                                          )}
-                                          {visit.vitals?.temp && (
-                                             <div>
-                                                <p className="text-xs text-zinc-500 font-medium">Temp</p>
-                                                <p className="text-blue-400 font-mono font-bold text-lg">{visit.vitals.temp}</p>
-                                             </div>
-                                          )}
-                                          {visit.vitals?.weight && (
-                                             <div>
-                                                <p className="text-xs text-zinc-500 font-medium">Weight</p>
-                                                <p className="text-emerald-400 font-mono font-bold text-lg">{visit.vitals.weight}</p>
-                                             </div>
-                                          )}
-                                       </div>
-                                    </div>
-                              ))}
-                              {getPatientHistory(activePatient.email).filter(v => v.vitals).length === 0 && (
-                                 <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl">
-                                    <Activity className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-                                    <p className="text-zinc-500 font-medium">No vitals documented for this patient.</p>
+                              {loadingHistory ? (
+                                 <div className="flex flex-col items-center justify-center py-10">
+                                    <Loader2 className="w-8 h-8 text-red-400 animate-spin mb-2" />
+                                    <p className="text-zinc-500 text-sm">Loading vitals flowsheet...</p>
                                  </div>
+                              ) : (
+                                 <>
+                                    {activePatientHistory
+                                       .filter(v => v.vitals && Object.values(v.vitals).some(val => val !== ''))
+                                       .map((visit, i) => (
+                                          <div key={i} className="bg-zinc-950 border border-white/5 rounded-xl p-4">
+                                             <div className="text-sm font-bold text-zinc-500 mb-3 uppercase tracking-widest border-b border-white/5 pb-2">
+                                                {visit.date}
+                                             </div>
+                                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                {visit.vitals?.bp && (
+                                                   <div>
+                                                      <p className="text-xs text-zinc-500 font-medium">BP</p>
+                                                      <p className="text-red-400 font-mono font-bold text-lg">{visit.vitals.bp}</p>
+                                                   </div>
+                                                )}
+                                                {visit.vitals?.hr && (
+                                                   <div>
+                                                      <p className="text-xs text-zinc-500 font-medium">HR</p>
+                                                      <p className="text-amber-400 font-mono font-bold text-lg">{visit.vitals.hr} <span className="text-xs text-zinc-600">bpm</span></p>
+                                                   </div>
+                                                )}
+                                                {visit.vitals?.temp && (
+                                                   <div>
+                                                      <p className="text-xs text-zinc-500 font-medium">Temp</p>
+                                                      <p className="text-blue-400 font-mono font-bold text-lg">{visit.vitals.temp}</p>
+                                                   </div>
+                                                )}
+                                                {visit.vitals?.weight && (
+                                                   <div>
+                                                      <p className="text-xs text-zinc-500 font-medium">Weight</p>
+                                                      <p className="text-emerald-400 font-mono font-bold text-lg">{visit.vitals.weight}</p>
+                                                   </div>
+                                                )}
+                                             </div>
+                                          </div>
+                                    ))}
+                                    {activePatientHistory.filter(v => v.vitals).length === 0 && (
+                                       <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl">
+                                          <Activity className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
+                                          <p className="text-zinc-500 font-medium">No vitals documented for this patient.</p>
+                                       </div>
+                                    )}
+                                 </>
                               )}
                            </div>
                         </div>

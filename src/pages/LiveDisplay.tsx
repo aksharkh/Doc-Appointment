@@ -1,19 +1,28 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, BellRing, MonitorPlay } from 'lucide-react';
+import { Volume2, BellRing, MonitorPlay, Loader2 } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
+import type { BookingData } from '../stores/useBookingStore';
 
 export default function LiveDisplay() {
   const { getActiveQueue } = useBookingStore();
   const [timeStr, setTimeStr] = useState('');
+  const [queue, setQueue] = useState<BookingData[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  // Realtime Active Queue
-  const queue = useMemo(() => getActiveQueue(), [getActiveQueue]);
-  
-  // We identify the "Now Serving" as the most recently updated "in_session" patients
-  const inSession = queue.filter(b => b.status === 'in_session' && b.roomAssigned);
-  const waiting = queue.filter(b => b.status === 'arrived' && b.token);
-  
+  // Fetch queue function
+  const fetchQueue = async () => {
+     try {
+        const data = await getActiveQueue();
+        setQueue(data);
+     } catch (err) {
+        console.error("Failed to fetch active queue", err);
+     } finally {
+        setLoading(false);
+     }
+  };
+
+  // Clock
   useEffect(() => {
      const timer = setInterval(() => {
         setTimeStr(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
@@ -21,8 +30,20 @@ export default function LiveDisplay() {
      return () => clearInterval(timer);
   }, []);
 
+  // Polling for queue
+  useEffect(() => {
+     fetchQueue();
+     const interval = setInterval(fetchQueue, 10000); // Poll every 10 seconds
+     return () => clearInterval(interval);
+  }, [getActiveQueue]);
+
+  // Derived states
+  const inSession = queue.filter(b => b.status === 'in_session' && b.roomAssigned);
+  const waiting = queue.filter(b => b.status === 'arrived' && b.token);
+  
   const prevTokensRef = useRef<Set<string>>(new Set());
 
+  // Sound effect on new token
   useEffect(() => {
      const currentTokens = new Set(inSession.map(s => s.token).filter(Boolean) as string[]);
      let hasNewToken = false;
@@ -33,8 +54,7 @@ export default function LiveDisplay() {
          }
      });
 
-     if(hasNewToken) {
-         // Play sound effect using Audio Context
+     if(hasNewToken && !loading) {
          try {
              const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
              const oscillator = audioCtx.createOscillator();
@@ -52,7 +72,15 @@ export default function LiveDisplay() {
      }
      
      prevTokensRef.current = currentTokens;
-  }, [inSession]);
+  }, [inSession, loading]);
+
+  if (loading && queue.length === 0) {
+     return (
+        <div className="w-screen h-screen bg-black flex items-center justify-center">
+           <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
+        </div>
+     );
+  }
 
   return (
     <div className="w-screen h-screen bg-black overflow-hidden flex flex-col font-sans select-none">
@@ -138,7 +166,7 @@ export default function LiveDisplay() {
              </div>
              
              <div className="grid grid-cols-1 gap-4">
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence>
                    {waiting.slice(0, 5).map((booking, idx) => (
                       <motion.div 
                          key={booking.id}
