@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, User, CheckCircle2, CalendarPlus } from 'lucide-react';
 import type { BookingData } from '../stores/useBookingStore';
+import WhatsAppBotSimulation from './WhatsAppBotSimulation';
 
 interface TicketProps {
   bookingId: string;
@@ -11,9 +13,10 @@ interface TicketProps {
 export default function Ticket({ bookingId, data }: TicketProps) {
   const qrValue = JSON.stringify({ id: bookingId, name: data.name, time: `${data.date} at ${data.time}` });
   
+  const [showBot, setShowBot] = useState(false);
+
   const handleWhatsApp = () => {
-    const text = `Hi, my booking is confirmed for ${data.date} at ${data.time}. Booking ID: ${bookingId}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+     setShowBot(true);
   };
 
   const handleGoogleCalendar = () => {
@@ -143,6 +146,10 @@ export default function Ticket({ bookingId, data }: TicketProps) {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+         {showBot && <WhatsAppBotSimulation bookingId={bookingId} data={data} onClose={() => setShowBot(false)} />}
+      </AnimatePresence>
     </motion.div>
   );
 }

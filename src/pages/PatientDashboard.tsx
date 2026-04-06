@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HeartPulse, ShieldCheck, Mail, Calendar, Clock, MapPin, XCircle } from 'lucide-react';
+import { HeartPulse, ShieldCheck, Mail, Calendar, Clock, MapPin, XCircle, Loader2 } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
+import type { BookingData } from '../stores/useBookingStore';
 
 export default function PatientDashboard() {
   const [email, setEmail] = useState('');
@@ -10,12 +11,24 @@ export default function PatientDashboard() {
   const { getPatientHistory, cancelBooking } = useBookingStore();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim().length > 3) setIsAuthenticated(true);
-  };
+  const [historyData, setHistoryData] = useState<BookingData[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
-  const history = getPatientHistory(email);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim().length > 3) {
+      setLoadingHistory(true);
+      try {
+        const data = await getPatientHistory(email);
+        setHistoryData(data);
+        setIsAuthenticated(true);
+      } catch (err) {
+        alert("Failed to retrieve medical records. Please check your email and try again.");
+      } finally {
+        setLoadingHistory(false);
+      }
+    }
+  };
 
   if (!isAuthenticated) return (
     <div className="min-h-screen bg-zinc-950 flex flex-col relative overflow-hidden">
@@ -56,8 +69,12 @@ export default function PatientDashboard() {
                  />
                </div>
              </div>
-             <button type="submit" className="w-full bg-white text-zinc-950 font-bold text-lg py-4 rounded-xl transition-transform hover:scale-[1.02]">
-               Access Records
+             <button disabled={loadingHistory} type="submit" className="w-full bg-white text-zinc-950 font-bold text-lg py-4 rounded-xl transition-transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                {loadingHistory ? (
+                   <>
+                     <Loader2 className="w-5 h-5 animate-spin" /> Verifying...
+                   </>
+                ) : 'Access Records'}
              </button>
            </form>
          </motion.div>
@@ -79,10 +96,10 @@ export default function PatientDashboard() {
 
       <main className="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8 z-10">
          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-3xl font-bold mb-1">Welcome back, {history[0]?.name || 'Patient'}</h1>
+            <h1 className="text-3xl font-bold mb-1">Welcome back, {historyData[0]?.name || 'Patient'}</h1>
             <p className="text-zinc-400 mb-8">Review your past visits and manage upcoming appointments.</p>
 
-            {history.length === 0 ? (
+            {historyData.length === 0 ? (
                <div className="glass-panel p-12 rounded-3xl text-center border-dashed border-white/20">
                   <HeartPulse className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
                   <h2 className="text-xl font-bold text-white mb-2">No records found</h2>
@@ -92,7 +109,7 @@ export default function PatientDashboard() {
             ) : (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                  <AnimatePresence>
-                  {history.map(visit => (
+                  {historyData.map(visit => (
                      <motion.div key={visit.id} layout className="glass-panel p-6 rounded-3xl flex flex-col justify-between border border-white/5 relative overflow-hidden group">
                         {visit.status === 'cancelled' && <div className="absolute inset-0 bg-red-950/10 z-0"></div>}
                         <div className="relative z-10">

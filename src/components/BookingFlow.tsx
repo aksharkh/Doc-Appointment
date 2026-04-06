@@ -13,7 +13,39 @@ const INSURANCES = ['Self-Pay (No Insurance)', 'BlueCross BlueShield', 'Aetna', 
 
 export default function BookingFlow() {
   const [step, setStep] = useState<Step>('triage');
-  const { addBooking, getSlotsForDate, settings } = useBookingStore();
+  const { addBooking, getSlotsForDate, settings, getActiveQueue, bookings } = useBookingStore();
+
+  const [activeQueueData, setActiveQueueData] = useState<{ serving: BookingData | undefined, waiting: number }>({
+    serving: undefined,
+    waiting: 0
+  });
+
+  useEffect(() => {
+    const updatePulse = async () => {
+      try {
+        const queue = await getActiveQueue();
+        setActiveQueueData({
+          serving: queue.find(b => b.status === 'in_session'),
+          waiting: queue.filter(b => b.status === 'arrived').length
+        });
+      } catch (err) {
+        // Fallback to local state if API fails
+        const todayStr = format(new Date(), 'MMMM d, yyyy');
+        const localQueue = bookings.filter(b => b.date === todayStr && ['arrived', 'in_session'].includes(b.status));
+        setActiveQueueData({
+          serving: localQueue.find(b => b.status === 'in_session'),
+          waiting: localQueue.filter(b => b.status === 'arrived').length
+        });
+      }
+    };
+
+    updatePulse();
+    const interval = setInterval(updatePulse, 30000); // Pulse every 30s
+    return () => clearInterval(interval);
+  }, [getActiveQueue, bookings]);
+
+  const currentlyServing = activeQueueData.serving;
+  const waitingCount = activeQueueData.waiting;
 
   // States
   const [availableDates, setAvailableDates] = useState<Date[]>([]);
@@ -118,16 +150,40 @@ export default function BookingFlow() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8 relative min-h-[600px] flex flex-col justify-center">
+    <div className={`w-full mx-auto px-4 py-8 relative min-h-[600px] flex flex-col justify-center transition-all duration-300 ${step === 'details' ? 'max-w-5xl' : 'max-w-4xl'}`}>
       
       <AnimatePresence mode="wait">
+        {step === 'triage' && (
+           <motion.div initial={{opacity: 0, y:-10}} animate={{opacity: 1, y: 0}} exit={{opacity:0, y:-10}} className="mb-6 flex flex-col sm:flex-row items-center gap-4 bg-zinc-900 border border-white/5 rounded-2xl p-4 shadow-lg w-full">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                 <div className="relative flex h-3 w-3">
+                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                   <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                 </div>
+                 <span className="text-sm font-bold text-zinc-300 uppercase tracking-widest">Live Clinic Pulse</span>
+              </div>
+              <div className="flex flex-1 w-full justify-between sm:justify-end gap-6 text-sm">
+                 <div className="flex flex-col sm:items-end">
+                    <span className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Currently Serving</span>
+                    <span className="text-white font-mono font-bold bg-zinc-800 px-2 mt-0.5 rounded border border-white/5">{currentlyServing?.token || 'Standby'}</span>
+                 </div>
+                 <div className="flex flex-col sm:items-end">
+                    <span className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Waiting Room</span>
+                    <span className="text-white font-bold bg-zinc-800 px-2 mt-0.5 rounded border border-white/5">{waitingCount} Patient{waitingCount !== 1 ? 's' : ''}</span>
+                 </div>
+              </div>
+           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence mode="wait">
         {step !== 'ticket' && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="mb-8"
-          >
+           <motion.div 
+             initial={{ opacity: 0, y: -20 }}
+             animate={{ opacity: 1, y: 0 }}
+             exit={{ opacity: 0, y: -20 }}
+             className="mb-8"
+           >
             <div className="flex items-center gap-4 mb-2">
               {step !== 'triage' && (
                 <button 
@@ -339,9 +395,10 @@ export default function BookingFlow() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
-              className="max-w-2xl"
+              className="w-full"
             >
-              <form onSubmit={handleBookingSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+               <form onSubmit={handleBookingSubmit} className="space-y-6 w-full max-w-2xl mx-auto">
                 <div className="glass-panel p-8 rounded-3xl space-y-6 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
 
@@ -442,6 +499,28 @@ export default function BookingFlow() {
                   </div>
                 </div>
               </form>
+
+               {/* Live Ticket Preview Sidebar */}
+               <div className="hidden lg:block sticky top-24 pl-4 border-l border-white/5">
+                  <div className="flex items-center gap-2 mb-4 justify-center text-zinc-500 font-bold text-sm uppercase tracking-widest">
+                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                     Live Ticket Preview
+                  </div>
+                  <div className="scale-90 origin-top opacity-80 pointer-events-none">
+                     <Ticket 
+                        bookingId="TKT-PREV" 
+                        data={{
+                          ...formData,
+                          id: 'PREV',
+                          date: selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'No Date',
+                          time: selectedSlot ? selectedSlot.time : 'No Time',
+                          status: 'confirmed',
+                          isNewPatient: formData.isNewPatient
+                        }} 
+                     />
+                  </div>
+               </div>
+              </div>
             </motion.div>
           )}
 

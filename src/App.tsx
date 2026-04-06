@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
@@ -94,6 +95,12 @@ const ClientPage = () => {
 )};
 
 function App() {
+  const fetchAllBookings = useBookingStore(state => state.fetchAllBookings);
+
+  useEffect(() => {
+    fetchAllBookings();
+  }, [fetchAllBookings]);
+
   return (
     <Router>
       <EmergencyBanner />

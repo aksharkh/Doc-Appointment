@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, BellRing, MonitorPlay } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
@@ -21,10 +21,19 @@ export default function LiveDisplay() {
      return () => clearInterval(timer);
   }, []);
 
-  // Mock audio ding whenever inSession changes (requires actual state tracking in real app)
-  const [prevSessionLength, setPrevSessionLength] = useState(inSession.length);
+  const prevTokensRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
-     if(inSession.length > prevSessionLength) {
+     const currentTokens = new Set(inSession.map(s => s.token).filter(Boolean) as string[]);
+     let hasNewToken = false;
+     
+     currentTokens.forEach(token => {
+         if(!prevTokensRef.current.has(token)) {
+             hasNewToken = true;
+         }
+     });
+
+     if(hasNewToken) {
          // Play sound effect using Audio Context
          try {
              const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -41,9 +50,9 @@ export default function LiveDisplay() {
              oscillator.stop(audioCtx.currentTime + 0.5);
          } catch(e) { /* ignore */ }
      }
-     setPrevSessionLength(inSession.length);
-  }, [inSession.length, prevSessionLength]);
-
+     
+     prevTokensRef.current = currentTokens;
+  }, [inSession]);
 
   return (
     <div className="w-screen h-screen bg-black overflow-hidden flex flex-col font-sans select-none">

@@ -9,6 +9,9 @@ export interface Prescription {
   name: string;
   dosage: string;
   instructions: string;
+  timing?: string;
+  frequency?: string;
+  comments?: string;
   status: RxStatus;
 }
 
@@ -24,7 +27,7 @@ export interface BookingData {
   name: string;
   phone: string;
   email: string;
-  type: ConsultationType; 
+  type: ConsultationType;
   specialty: string;
   insurance?: string;
   isNewPatient: boolean;
@@ -32,14 +35,10 @@ export interface BookingData {
   time: string;
   reason?: string;
   status: BookingStatus;
-  
-  // Phase 4 Operational Data
-  token?: string; // e.g. "A-101"
-  roomAssigned?: string; // e.g. "Room 2"
+  token?: string;
+  roomAssigned?: string;
   telehealthLink?: string;
   doctorAssigned?: string;
-  
-  // Clinical Encounter Data
   chronicConditions?: string[];
   allergies?: string[];
   vitals?: Vitals;
@@ -56,231 +55,260 @@ export interface Slot {
 }
 
 export interface ClinicSettings {
-  lunchBlock: boolean; 
+  lunchBlock: boolean;
   emergencyBlockAll: boolean;
-  delayIndicator: string; 
+  delayIndicator: string;
 }
 
+// ─── API base URL ────────────────────────────────────────────────────────────
+const API_BASE = 'http://localhost:8080/api';
+
+async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { message?: string }).message || `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+// ─── Store interface ──────────────────────────────────────────────────────────
 interface BookingState {
   bookings: BookingData[];
-  adminBlockedSlots: Record<string, string[]>; 
+  adminBlockedSlots: Record<string, string[]>;
   isAuthenticated: boolean;
   settings: ClinicSettings;
-  
+  isLoading: boolean;
+  error: string | null;
+
   // Actions
   login: (password: string) => boolean;
   logout: () => void;
+  fetchAllBookings: () => Promise<void>;
   addBooking: (booking: Omit<BookingData, 'id' | 'status'>) => Promise<string>;
-  updateBookingStatus: (id: string, status: BookingStatus) => void;
-  updateBookingRoomAndToken: (id: string, room: string, token: string) => void;
-  updateTelehealthLink: (id: string, link: string) => void;
-  updateClinicalEncounter: (id: string, data: Partial<BookingData>) => void;
-  updateRxStatus: (bookingId: string, rxIndex: number, status: RxStatus) => void;
-  cancelBooking: (id: string) => void;
+  updateBookingStatus: (id: string, status: BookingStatus) => Promise<void>;
+  updateBookingRoomAndToken: (id: string, room: string, token: string) => Promise<void>;
+  updateTelehealthLink: (id: string, link: string) => Promise<void>;
+  updateClinicalEncounter: (id: string, data: Partial<BookingData>) => Promise<void>;
+  updateRxStatus: (bookingId: string, rxIndex: number, status: RxStatus) => Promise<void>;
+  cancelBooking: (id: string) => Promise<void>;
   toggleAdminBlockSlot: (dateStringISO: string, timeString: string) => void;
   toggleLunchBlock: () => void;
   toggleEmergencyBlock: () => void;
   getSlotsForDate: (date: Date) => Slot[];
-  getPatientHistory: (email: string) => BookingData[];
-  getActiveQueue: () => BookingData[];
+  getPatientHistory: (email: string) => Promise<BookingData[]>;
+  getActiveQueue: () => Promise<BookingData[]>;
+  updatePatientProfile: (email: string, profileData: { chronicConditions?: string[]; allergies?: string[] }) => Promise<void>;
 }
 
+// ─── Store ────────────────────────────────────────────────────────────────────
 export const useBookingStore = create<BookingState>((set, get) => ({
-  bookings: [
-     { 
-        id: 'BKG-MOCK1', 
-        name: 'Alice Smith', 
-        phone: '555-0101', 
-        email: 'alice@example.com', 
-        type: 'in-person',
-        specialty: 'Cardiology',
-        insurance: 'BlueCross',
-        isNewPatient: false,
-        date: format(new Date(), 'MMMM d, yyyy'), 
-        time: '10:00 AM', 
-        status: 'arrived', 
-        reason: 'Palpitations follow-up',
-        doctorAssigned: 'Dr. Evans',
-        token: 'A-101',
-        roomAssigned: 'Room 1',
-        chronicConditions: ['Hypertension'],
-        allergies: ['Penicillin'],
-        vitals: { bp: '135/85', hr: '88', temp: '98.6', weight: '160 lbs' }
-     },
-     { 
-        id: 'BKG-MOCK2', 
-        name: 'Bob Johnson', 
-        phone: '555-0102', 
-        email: 'bob@example.com', 
-        type: 'in-person',
-        specialty: 'General Practice',
-        isNewPatient: true,
-        date: format(new Date(), 'MMMM d, yyyy'), 
-        time: '11:00 AM', 
-        status: 'confirmed',
-        reason: 'Flu symptoms',
-        token: 'B-205'
-     },
-     { 
-        id: 'BKG-MOCK3', 
-        name: 'Sarah Connor', 
-        phone: '555-0103', 
-        email: 'sarah@example.com', 
-        type: 'telehealth',
-        specialty: 'Neurology',
-        isNewPatient: false,
-        date: format(new Date(), 'MMMM d, yyyy'), 
-        time: '02:00 PM', 
-        status: 'in_session',
-        reason: 'Migraines',
-        telehealthLink: 'https://zoom.us/mock-link',
-        prescriptions: [
-           { name: 'Sumatriptan', dosage: '50mg', instructions: 'Take 1 pill at onset of migraine', status: 'pending' }
-        ]
-     },
-  ],
+  bookings: [],
   adminBlockedSlots: {},
   isAuthenticated: false,
+  isLoading: false,
+  error: null,
   settings: {
-     lunchBlock: true,
-     emergencyBlockAll: false,
-     delayIndicator: 'On Time'
+    lunchBlock: true,
+    emergencyBlockAll: false,
+    delayIndicator: 'On Time',
   },
 
   login: (password) => {
-     if (password === 'admin123') {
-        set({ isAuthenticated: true });
-        return true;
-     }
-     return false;
+    if (password === 'admin123') {
+      set({ isAuthenticated: true });
+      return true;
+    }
+    return false;
   },
 
   logout: () => set({ isAuthenticated: false }),
 
+  // ── Fetch all bookings from backend on load ──────────────────────────────
+  fetchAllBookings: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await apiFetch<BookingData[]>('/bookings');
+      set({ bookings: data, isLoading: false });
+    } catch (e) {
+      set({ error: (e as Error).message, isLoading: false });
+    }
+  },
+
+  // ── Create new booking ───────────────────────────────────────────────────
   addBooking: async (bookingData) => {
-     await new Promise(res => setTimeout(res, 1200)); 
-     
-     // Look up if patient has chronic conditions from history
-     const history = get().bookings.filter(b => b.email === bookingData.email);
-     const pastPatient = history.find(b => b.chronicConditions || b.allergies);
-     
-     const newBooking: BookingData = {
-        ...bookingData,
-        id: `BKG-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        status: 'confirmed',
-        chronicConditions: pastPatient?.chronicConditions,
-        allergies: pastPatient?.allergies,
-     };
-     set((state) => ({ bookings: [...state.bookings, newBooking] }));
-     return newBooking.id;
+    set({ isLoading: true, error: null });
+    try {
+      const created = await apiFetch<BookingData>('/bookings', {
+        method: 'POST',
+        body: JSON.stringify(bookingData),
+      });
+      set((state) => ({ bookings: [...state.bookings, created], isLoading: false }));
+      return created.id;
+    } catch (e) {
+      set({ error: (e as Error).message, isLoading: false });
+      throw e;
+    }
   },
 
-  updateBookingStatus: (id, status) => {
-     set(state => ({
-        bookings: state.bookings.map(b => b.id === id ? { ...b, status } : b)
-     }));
-  },
-  
-  updateBookingRoomAndToken: (id, roomAssigned, token) => {
-     set(state => ({
-         bookings: state.bookings.map(b => b.id === id ? { ...b, roomAssigned, token } : b)
-     }));
-  },
-
-  updateTelehealthLink: (id, link) => {
-     set(state => ({
-        bookings: state.bookings.map(b => b.id === id ? { ...b, telehealthLink: link } : b)
-     }));
-  },
-  
-  updateClinicalEncounter: (id, data) => {
-     set(state => ({
-         bookings: state.bookings.map(b => b.id === id ? { ...b, ...data } : b)
-     }));
-  },
-  
-  updateRxStatus: (bookingId, rxIndex, status) => {
-     set(state => ({
-         bookings: state.bookings.map(b => {
-             if (b.id !== bookingId) return b;
-             const updatedRx = [...(b.prescriptions || [])];
-             if (updatedRx[rxIndex]) {
-                 updatedRx[rxIndex].status = status;
-             }
-             return { ...b, prescriptions: updatedRx };
-         })
-     }));
+  // ── Update status ────────────────────────────────────────────────────────
+  updateBookingStatus: async (id, status) => {
+    const updated = await apiFetch<BookingData>(`/bookings/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+    set((state) => ({
+      bookings: state.bookings.map((b) => (b.id === id ? updated : b)),
+    }));
   },
 
-  cancelBooking: (id) => {
-     set((state) => ({
-        bookings: state.bookings.map(b => b.id === id ? { ...b, status: 'cancelled' } : b)
-     }));
+  // ── Assign room & token ──────────────────────────────────────────────────
+  updateBookingRoomAndToken: async (id, roomAssigned, token) => {
+    const updated = await apiFetch<BookingData>(`/bookings/${id}/room`, {
+      method: 'PATCH',
+      body: JSON.stringify({ roomAssigned, token }),
+    });
+    set((state) => ({
+      bookings: state.bookings.map((b) => (b.id === id ? updated : b)),
+    }));
   },
 
+  // ── Set telehealth link ──────────────────────────────────────────────────
+  updateTelehealthLink: async (id, link) => {
+    const updated = await apiFetch<BookingData>(`/bookings/${id}/telehealth`, {
+      method: 'PATCH',
+      body: JSON.stringify({ telehealthLink: link }),
+    });
+    set((state) => ({
+      bookings: state.bookings.map((b) => (b.id === id ? updated : b)),
+    }));
+  },
+
+  // ── Update clinical encounter (vitals, Rx, notes) ─────────────────────────
+  updateClinicalEncounter: async (id, data) => {
+    const updated = await apiFetch<BookingData>(`/bookings/${id}/clinical`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    set((state) => ({
+      bookings: state.bookings.map((b) => (b.id === id ? updated : b)),
+    }));
+  },
+
+  // ── Update single Rx status (client-side optimistic, then sync) ───────────
+  updateRxStatus: async (bookingId, rxIndex, status) => {
+    // Optimistic update
+    set((state) => ({
+      bookings: state.bookings.map((b) => {
+        if (b.id !== bookingId) return b;
+        const updatedRx = [...(b.prescriptions || [])];
+        if (updatedRx[rxIndex]) updatedRx[rxIndex] = { ...updatedRx[rxIndex], status };
+        return { ...b, prescriptions: updatedRx };
+      }),
+    }));
+    // Sync full Rx list to backend
+    const booking = get().bookings.find((b) => b.id === bookingId);
+    if (booking?.prescriptions) {
+      await apiFetch<BookingData>(`/bookings/${bookingId}/clinical`, {
+        method: 'PUT',
+        body: JSON.stringify({ prescriptions: booking.prescriptions }),
+      });
+    }
+  },
+
+  // ── Cancel booking ───────────────────────────────────────────────────────
+  cancelBooking: async (id) => {
+    const updated = await apiFetch<BookingData>(`/bookings/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'cancelled' }),
+    });
+    set((state) => ({
+      bookings: state.bookings.map((b) => (b.id === id ? updated : b)),
+    }));
+  },
+
+  // ── Get patient history from backend ─────────────────────────────────────
+  getPatientHistory: async (email) => {
+    const history = await apiFetch<BookingData[]>(`/bookings/history?email=${encodeURIComponent(email)}`);
+    return history;
+  },
+
+  // ── Get live active queue from backend ───────────────────────────────────
+  getActiveQueue: async () => {
+    const queue = await apiFetch<BookingData[]>('/bookings/queue');
+    return queue;
+  },
+
+  // ── Update patient profile ───────────────────────────────────────────────
+  updatePatientProfile: async (email, profileData) => {
+    await apiFetch<BookingData>(`/bookings/patient/${encodeURIComponent(email)}`, {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.email.toLowerCase() === email.toLowerCase() ? { ...b, ...profileData } : b
+      ),
+    }));
+  },
+
+  // ── Admin slot blocking (local only, no backend) ─────────────────────────
   toggleAdminBlockSlot: (dateISO, time) => {
-     set((state) => {
-        const blocks = { ...state.adminBlockedSlots };
-        if (!blocks[dateISO]) blocks[dateISO] = [];
-        
-        if (blocks[dateISO].includes(time)) {
-           blocks[dateISO] = blocks[dateISO].filter(t => t !== time);
-        } else {
-           blocks[dateISO] = [...blocks[dateISO], time];
-        }
-        return { adminBlockedSlots: blocks };
-     });
+    set((state) => {
+      const blocks = { ...state.adminBlockedSlots };
+      if (!blocks[dateISO]) blocks[dateISO] = [];
+      if (blocks[dateISO].includes(time)) {
+        blocks[dateISO] = blocks[dateISO].filter((t) => t !== time);
+      } else {
+        blocks[dateISO] = [...blocks[dateISO], time];
+      }
+      return { adminBlockedSlots: blocks };
+    });
   },
 
   toggleLunchBlock: () => {
-     set(state => ({ settings: { ...state.settings, lunchBlock: !state.settings.lunchBlock } }));
+    set((state) => ({
+      settings: { ...state.settings, lunchBlock: !state.settings.lunchBlock },
+    }));
   },
 
   toggleEmergencyBlock: () => {
-     set(state => ({ settings: { ...state.settings, emergencyBlockAll: !state.settings.emergencyBlockAll } }));
+    set((state) => ({
+      settings: { ...state.settings, emergencyBlockAll: !state.settings.emergencyBlockAll },
+    }));
   },
 
-  getPatientHistory: (email) => {
-     return get().bookings.filter(b => b.email.toLowerCase() === email.toLowerCase());
-  },
-  
-  getActiveQueue: () => {
-      const todayStr = format(new Date(), 'MMMM d, yyyy');
-      return get().bookings.filter(b => b.date === todayStr && ['arrived', 'in_session'].includes(b.status));
-  },
-
+  // ── Slot availability (computed locally from cached bookings) ─────────────
   getSlotsForDate: (date: Date) => {
-     const state = get();
-     if (state.settings.emergencyBlockAll) return []; 
+    const state = get();
+    if (state.settings.emergencyBlockAll) return [];
 
-     const day = date.getDay();
-     if (day === 0 || day === 6) return []; 
+    const day = date.getDay();
+    if (day === 0 || day === 6) return [];
 
-     const dateFormatted = format(date, 'MMMM d, yyyy'); 
-     const dateISO = format(date, 'yyyy-MM-dd'); 
-     
-     const allTimes = ['10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'];
-     
-     const activeStatuses = ['confirmed', 'arrived', 'in_session'];
-     const takenBookings = state.bookings
-        .filter(b => b.date === dateFormatted && activeStatuses.includes(b.status))
-        .map(b => b.time);
-     
-     const blocked = state.adminBlockedSlots[dateISO] || [];
+    const dateFormatted = format(date, 'MMMM d, yyyy');
+    const dateISO = format(date, 'yyyy-MM-dd');
 
-     return allTimes.map(time => {
-        let isBlockedAdmin = blocked.includes(time);
-        if (state.settings.lunchBlock && time === '01:00 PM') {
-           isBlockedAdmin = true; 
-        }
+    const allTimes = ['10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'];
 
-        const isTaken = takenBookings.includes(time);
+    const activeStatuses = ['confirmed', 'arrived', 'in_session'];
+    const takenTimes = state.bookings
+      .filter((b) => b.date === dateFormatted && activeStatuses.includes(b.status))
+      .map((b) => b.time);
 
-        return {
-           time,
-           available: !isTaken && !isBlockedAdmin,
-           blockedByAdmin: isBlockedAdmin
-        };
-     });
-  }
+    const blocked = state.adminBlockedSlots[dateISO] || [];
+
+    return allTimes.map((time) => {
+      let isBlockedAdmin = blocked.includes(time);
+      if (state.settings.lunchBlock && time === '01:00 PM') isBlockedAdmin = true;
+      return {
+        time,
+        available: !takenTimes.includes(time) && !isBlockedAdmin,
+        blockedByAdmin: isBlockedAdmin,
+      };
+    });
+  },
 }));
