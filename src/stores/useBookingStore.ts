@@ -83,6 +83,7 @@ interface BookingState {
   settings: ClinicSettings;
   isLoading: boolean;
   error: string | null;
+  analyticsData: any | null;
 
   // Actions
   login: (password: string) => boolean;
@@ -102,6 +103,7 @@ interface BookingState {
   getPatientHistory: (email: string) => Promise<BookingData[]>;
   getActiveQueue: () => Promise<BookingData[]>;
   updatePatientProfile: (email: string, profileData: { chronicConditions?: string[]; allergies?: string[] }) => Promise<void>;
+  fetchAnalytics: () => Promise<void>;
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -111,6 +113,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  analyticsData: null,
   settings: {
     lunchBlock: true,
     emergencyBlockAll: false,
@@ -255,6 +258,15 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     }));
   },
 
+  fetchAnalytics: async () => {
+    try {
+      const data = await apiFetch<any>('/bookings/analytics');
+      set({ analyticsData: data });
+    } catch (e) {
+      console.error("Failed to fetch analytics", e);
+    }
+  },
+
   // ── Admin slot blocking (local only, no backend) ─────────────────────────
   toggleAdminBlockSlot: (dateISO, time) => {
     set((state) => {
@@ -287,27 +299,55 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     if (state.settings.emergencyBlockAll) return [];
 
     const day = date.getDay();
-    if (day === 0 || day === 6) return [];
+    if (day === 0 || day === 6) return []; // Sunday/Saturday closed
 
     const dateFormatted = format(date, 'MMMM d, yyyy');
     const dateISO = format(date, 'yyyy-MM-dd');
+    const todayISO = format(new Date(), 'yyyy-MM-dd');
+    const isTodayDate = todayISO === dateISO;
 
     const allTimes = ['10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'];
-
-    const activeStatuses = ['confirmed', 'arrived', 'in_session'];
+    
+    // Statuses that occupy a slot (Including completed/no_show to keep slot blocked)
+    const occupiedStatuses = ['confirmed', 'arrived', 'in_session', 'completed'];
     const takenTimes = state.bookings
-      .filter((b) => b.date === dateFormatted && activeStatuses.includes(b.status))
+      .filter((b) => b.date === dateFormatted && occupiedStatuses.includes(b.status))
       .map((b) => b.time);
 
-    const blocked = state.adminBlockedSlots[dateISO] || [];
+    const blockedManually = state.adminBlockedSlots[dateISO] || [];
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
 
     return allTimes.map((time) => {
-      let isBlockedAdmin = blocked.includes(time);
-      if (state.settings.lunchBlock && time === '01:00 PM') isBlockedAdmin = true;
+      // 1. Check if it's in the past (only for Today)
+      let isPast = false;
+      if (isTodayDate) {
+          const [hStr, mStr] = time.split(':');
+          const [min, ampm] = mStr.split(' ');
+          let hour = parseInt(hStr);
+          if (ampm === 'PM' && hour !== 12) hour += 12;
+          if (ampm === 'AM' && hour === 12) hour = 0;
+          
+          if (hour < currentHour || (hour === currentHour && parseInt(min) <= currentMinute)) {
+              isPast = true;
+          }
+      }
+
+      // 2. Check if it's the lunch block
+      let isLunch = state.settings.lunchBlock && time === '01:00 PM';
+      
+      // 3. Final calculation
+      const isTaken = takenTimes.includes(time);
+      const isBlockedManually = blockedManually.includes(time);
+      
+      const available = !isTaken && !isBlockedManually && !isPast && !isLunch;
+
       return {
         time,
-        available: !takenTimes.includes(time) && !isBlockedAdmin,
-        blockedByAdmin: isBlockedAdmin,
+        available,
+        blockedByAdmin: isBlockedManually || isLunch, // Show as specifically blocked by rules
       };
     });
   },

@@ -1,21 +1,20 @@
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Pill, CheckCheck, Clock } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
 import type { BookingData, Prescription } from '../stores/useBookingStore';
-import { format } from 'date-fns';
 
 export default function AdminPharmacy() {
-  const { bookings, updateRxStatus } = useBookingStore();
+  const { bookings, updateRxStatus, fetchAllBookings } = useBookingStore();
   
-  // Find all active bookings that have prescriptions.
-  // Group them by the 'pending' vs 'packed' state
-  const todayStr = format(new Date(), 'MMMM d, yyyy');
-  
-  const todayRxBookings = bookings.filter(b => b.date === todayStr && b.prescriptions && b.prescriptions.length > 0);
+  // Refresh on load
+  useEffect(() => {
+    fetchAllBookings();
+  }, [fetchAllBookings]);
   
   const getRxList = (status: 'pending' | 'packed' | 'dispensed') => {
       let list: { booking: BookingData, rx: Prescription, index: number }[] = [];
-      todayRxBookings.forEach(b => {
+      bookings.forEach(b => {
          b.prescriptions?.forEach((p, idx) => {
              if(p.status === status) list.push({ booking: b, rx: p, index: idx });
          });
