@@ -73,12 +73,12 @@ export default function AdminDashboard() {
     <div className="space-y-8">
        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-             <h1 className="text-3xl font-bold tracking-tight text-white mb-1">Clinic Command Center</h1>
+             <h1 className="text-3xl font-bold tracking-tight text-[var(--text-main)] mb-1">Clinic Command Center</h1>
              <p className="text-zinc-400">Live operational oversight and patient flow management.</p>
           </div>
-          <div className="flex bg-zinc-900 border border-white/5 rounded-xl p-1">
-             <button onClick={() => setActiveTab('slots')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'slots' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>Slot Manager</button>
-             <button onClick={() => setActiveTab('analytics')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'analytics' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>Analytics</button>
+          <div className="flex bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-1">
+             <button onClick={() => setActiveTab('slots')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'slots' ? 'bg-zinc-800 text-[var(--text-main)]' : 'text-[var(--text-dim)] hover:text-zinc-300'}`}>Slot Manager</button>
+             <button onClick={() => setActiveTab('analytics')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'analytics' ? 'bg-zinc-800 text-[var(--text-main)]' : 'text-[var(--text-dim)] hover:text-zinc-300'}`}>Analytics</button>
           </div>
        </div>
 
@@ -86,9 +86,9 @@ export default function AdminDashboard() {
        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="glass-panel p-6 rounded-2xl flex items-center justify-between border-l-4 border-emerald-500">
              <div>
-                <p className="text-zinc-500 font-medium text-sm">Scheduled Today</p>
+                <p className="text-[var(--text-dim)] font-medium text-sm">Scheduled Today</p>
                 <div className="flex items-center gap-2 mt-1">
-                   <p className="text-4xl font-bold text-white">{todayBookings}</p>
+                   <p className="text-4xl font-bold text-[var(--text-main)]">{todayBookings}</p>
                    {todayBookings > 4 ? <span className="text-[10px] bg-red-500/20 text-red-500 font-bold px-2 py-0.5 rounded uppercase">High load</span> : null}
                 </div>
              </div>
@@ -96,15 +96,15 @@ export default function AdminDashboard() {
           </div>
           <div className="glass-panel p-6 rounded-2xl flex items-center justify-between border-l-4 border-yellow-500">
              <div>
-                <p className="text-zinc-500 font-medium text-sm">Waiting Room (Arrived)</p>
-                <p className="text-4xl font-bold text-white mt-1">{activePatients}</p>
+                <p className="text-[var(--text-dim)] font-medium text-sm">Waiting Room (Arrived)</p>
+                <p className="text-4xl font-bold text-[var(--text-main)] mt-1">{activePatients}</p>
              </div>
              <Users className="w-8 h-8 opacity-20 text-yellow-400" />
           </div>
           <div className="glass-panel p-6 rounded-2xl flex items-center justify-between border-l-4 border-blue-500">
              <div>
-                <p className="text-zinc-500 font-medium text-sm">In Session</p>
-                <p className="text-4xl font-bold text-white mt-1">{activeSessions}</p>
+                <p className="text-[var(--text-dim)] font-medium text-sm">In Session</p>
+                <p className="text-4xl font-bold text-[var(--text-main)] mt-1">{activeSessions}</p>
              </div>
              <Activity className="w-8 h-8 opacity-20 text-blue-400" />
           </div>
@@ -113,16 +113,16 @@ export default function AdminDashboard() {
        {activeTab === 'slots' && (
        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2 space-y-4">
-             <div className="flex items-center justify-between bg-zinc-900 border border-white/5 px-4 py-3 rounded-2xl">
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+             <div className="flex items-center justify-between bg-[var(--bg-card)] border border-[var(--border-main)] px-4 py-3 rounded-2xl">
+                  <h2 className="text-lg font-bold text-[var(--text-main)] flex items-center gap-2">
                      <Clock className="w-5 h-5 text-emerald-400" /> Dispatch Board
                   </h2>
                   <div className="flex items-center gap-3">
-                     <button onClick={() => setSelectedDate(subDays(selectedDate, 1))} className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors">
+                     <button onClick={() => setSelectedDate(subDays(selectedDate, 1))} className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-[var(--text-main)] transition-colors">
                         <ChevronLeft className="w-4 h-4" />
                      </button>
                      <span className="text-sm font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">{dateFormatted}</span>
-                     <button onClick={() => setSelectedDate(addDays(selectedDate, 1))} className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors">
+                     <button onClick={() => setSelectedDate(addDays(selectedDate, 1))} className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-[var(--text-main)] transition-colors">
                         <ChevronRight className="w-4 h-4" />
                      </button>
                   </div>
@@ -133,16 +133,16 @@ export default function AdminDashboard() {
                      {allTimes.map(time => {
                         const state = getSlotState(time);
                         return (
-                           <div key={time} className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-4 rounded-xl border border-white/5 bg-zinc-950/40 hover:bg-zinc-800/40 transition-colors group gap-4">
+                           <div key={time} className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-4 rounded-xl border border-[var(--border-main)] bg-[var(--bg-main)]/40 hover:bg-zinc-800/40 transition-colors group gap-4">
                               <div className="flex flex-col flex-1 min-w-0">
                                  <span className="font-bold text-zinc-200 text-lg">{time}</span>
                                  {state.type === 'booked' && (
                                     <div className="mt-1 flex flex-col gap-1">
                                        <span className="text-sm font-bold text-emerald-400 flex items-center gap-2">
                                           {state.detail?.name}
-                                          {state.detail?.status === 'completed' && <span className="text-[10px] bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded tracking-widest uppercase">Finished</span>}
+                                          {state.detail?.status === 'completed' && <span className="text-[10px] bg-zinc-800 text-[var(--text-dim)] px-1.5 py-0.5 rounded tracking-widest uppercase">Finished</span>}
                                        </span>
-                                       <span className="text-xs text-zinc-500 flex gap-2">
+                                       <span className="text-xs text-[var(--text-dim)] flex gap-2">
                                           <span>{state.detail?.type === 'telehealth' ? '💻 Telehealth' : '🏥 In-person'}</span>
                                           <span>&bull;</span>
                                           <span>{state.detail?.specialty}</span>
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
                                        </span>
                                     </div>
                                  )}
-                                 {state.type === 'available' && <span className="text-sm font-medium text-zinc-500 mt-1">Slot Available</span>}
+                                 {state.type === 'available' && <span className="text-sm font-medium text-[var(--text-dim)] mt-1">Slot Available</span>}
                                  {state.type === 'blocked' && <span className="text-sm font-medium text-red-500/80 mt-1">{(state as any).isLunch ? 'Lunch Break (Closed)' : 'Blocked by Operations'}</span>}
                               </div>
                               
@@ -160,8 +160,8 @@ export default function AdminDashboard() {
                                     <>
                                       {state.detail?.status === 'confirmed' && (
                                          <div className="flex items-center gap-2 w-full">
-                                             <input type="text" placeholder="Token e.g. A-101" value={tokenInput[state.detail.id] || ''} onChange={e=>setTokenInput({...tokenInput, [state.detail!.id]: e.target.value})} className="flex-1 bg-zinc-900 border border-white/10 rounded-lg text-xs px-2 py-2 outline-none text-white focus:ring-1 focus:ring-emerald-500" />
-                                             <input type="text" placeholder="Room" value={roomInput[state.detail.id] || ''} onChange={e=>setRoomInput({...roomInput, [state.detail!.id]: e.target.value})} className="flex-1 bg-zinc-900 border border-white/10 rounded-lg text-xs px-2 py-2 outline-none text-white focus:ring-1 focus:ring-emerald-500" />
+                                             <input type="text" placeholder="Token e.g. A-101" value={tokenInput[state.detail.id] || ''} onChange={e=>setTokenInput({...tokenInput, [state.detail!.id]: e.target.value})} className="flex-1 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-lg text-xs px-2 py-2 outline-none text-[var(--text-main)] focus:ring-1 focus:ring-emerald-500" />
+                                             <input type="text" placeholder="Room" value={roomInput[state.detail.id] || ''} onChange={e=>setRoomInput({...roomInput, [state.detail!.id]: e.target.value})} className="flex-1 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-lg text-xs px-2 py-2 outline-none text-[var(--text-main)] focus:ring-1 focus:ring-emerald-500" />
                                              <button onClick={()=>handleQueueDispatch(state.detail!.id)} className="px-3 py-2 bg-emerald-500 text-emerald-950 font-bold text-xs rounded-lg hover:bg-emerald-400 whitespace-nowrap">Receive</button>
                                          </div>
                                       )}
@@ -178,7 +178,7 @@ export default function AdminDashboard() {
                                       {state.detail?.status === 'in_session' && (
                                           <div className="flex flex-col items-end gap-2 w-full">
                                              <p className="text-xs font-bold text-blue-400 border border-blue-500/20 bg-blue-500/10 px-3 py-1 rounded w-max">SESSION ACTIVE</p>
-                                             <button onClick={()=>navigate(`/admin/encounter/${state.detail!.id}`)} className="w-full py-2 bg-zinc-800 text-white font-bold text-sm rounded-lg hover:bg-zinc-700 flex items-center justify-center gap-1">
+                                             <button onClick={()=>navigate(`/admin/encounter/${state.detail!.id}`)} className="w-full py-2 bg-zinc-800 text-[var(--text-main)] font-bold text-sm rounded-lg hover:bg-zinc-700 flex items-center justify-center gap-1">
                                                 Resume Dashboard <ChevronRight className="w-4 h-4" />
                                              </button>
                                           </div>
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
                                               placeholder="Meet/Zoom URL" 
                                               value={telehealthInputs[state.detail.id] ?? state.detail.telehealthLink ?? ''}
                                               onChange={(e) => setTelehealthInputs(prev => ({...prev, [state.detail!.id]: e.target.value}))}
-                                              className="flex-1 bg-zinc-900 border border-white/10 rounded-lg text-xs px-2 py-1.5 outline-none text-blue-300" 
+                                              className="flex-1 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-lg text-xs px-2 py-1.5 outline-none text-blue-300" 
                                             />
                                             <button 
                                                onClick={() => updateTelehealthLink(state.detail!.id, telehealthInputs[state.detail!.id] || '')}
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                                            className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors border w-full lg:w-32 ${
                                               state.type === 'blocked' 
                                               ? 'bg-red-500/10 text-red-500 font-bold border-red-500/30 hover:bg-red-500/20' 
-                                              : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700 hover:text-white'
+                                              : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700 hover:text-[var(--text-main)]'
                                            }`}
                                         >
                                            {state.type === 'blocked' ? 'Unblock' : 'Block Slot'}
@@ -236,7 +236,7 @@ export default function AdminDashboard() {
           </div>
           
           <div className="space-y-4">
-             <h2 className="text-lg font-bold text-white px-2">Telehealth Queue</h2>
+             <h2 className="text-lg font-bold text-[var(--text-main)] px-2">Telehealth Queue</h2>
              <div className="glass-panel p-6 rounded-2xl flex flex-col gap-4">
                  <AnimatePresence>
                    {selectedDayBookings.filter(b => b.type === 'telehealth' && !['completed', 'no_show', 'cancelled'].includes(b.status)).map(booking => (
@@ -244,15 +244,15 @@ export default function AdminDashboard() {
                          key={booking.id}
                          initial={{ opacity: 0, x: 20 }}
                          animate={{ opacity: 1, x: 0 }}
-                         className="flex flex-col pb-4 border-b border-white/5 last:border-0 last:pb-0"
+                         className="flex flex-col pb-4 border-b border-[var(--border-main)] last:border-0 last:pb-0"
                       >
                          <div className="flex items-center justify-between mb-2">
                             <span className="font-bold text-sm text-blue-300 flex items-center gap-2">
                               <Video className="w-4 h-4" /> {booking.time}
                             </span>
                          </div>
-                         <span className="text-sm font-bold text-white">{booking.name}</span>
-                         <span className="text-xs text-zinc-500">{booking.specialty}</span>
+                         <span className="text-sm font-bold text-[var(--text-main)]">{booking.name}</span>
+                         <span className="text-xs text-[var(--text-dim)]">{booking.specialty}</span>
                          {booking.telehealthLink ? (
                             <a href={booking.telehealthLink} className="mt-2 text-xs bg-blue-500/20 text-blue-400 px-3 py-1.5 rounded-lg w-max font-bold hover:bg-blue-500/30 transition-colors">Launch External Meeting</a>
                          ) : (
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
                    ))}
                  </AnimatePresence>
                  {selectedDayBookings.filter(b => b.type === 'telehealth' && !['completed', 'no_show', 'cancelled'].includes(b.status)).length === 0 && (
-                    <p className="text-sm text-zinc-500 text-center py-4">No active telehealth appointments today.</p>
+                    <p className="text-sm text-[var(--text-dim)] text-center py-4">No active telehealth appointments today.</p>
                  )}
              </div>
           </div>
@@ -274,13 +274,13 @@ export default function AdminDashboard() {
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="glass-panel p-8 rounded-3xl min-h-[400px]">
                    <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-2xl font-bold text-white flex items-center gap-2"><BarChart3 className="w-6 h-6 text-emerald-500" /> Patient Volume</h2>
-                      <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Aggregate View</span>
+                      <h2 className="text-2xl font-bold text-[var(--text-main)] flex items-center gap-2"><BarChart3 className="w-6 h-6 text-emerald-500" /> Patient Volume</h2>
+                      <span className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-widest">Aggregate View</span>
                    </div>
                    <div className="space-y-10">
                       <div>
                          <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-[0.2em] mb-6">Recent Daily Flow</h3>
-                         <div className="h-48 flex items-end gap-3 border-b border-white/10 pb-4 relative">
+                         <div className="h-48 flex items-end gap-3 border-b border-[var(--border-main)] pb-4 relative">
                             {/* Mock/Real data mapping */}
                             {Object.entries(analyticsData?.volumeByDay || {}).sort((a,b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()).slice(-7).map(([day, count], i) => {
                                const height = Math.min(((count as number) / 10) * 100, 100);
@@ -292,7 +292,7 @@ export default function AdminDashboard() {
                                       >
                                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-emerald-500 to-transparent h-full opacity-30" />
                                          <div className="absolute top-2 inset-x-0 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="text-[10px] font-black text-white bg-zinc-950 px-1.5 py-0.5 rounded">{count as any}</span>
+                                            <span className="text-[10px] font-black text-[var(--text-main)] bg-[var(--bg-main)] px-1.5 py-0.5 rounded">{count as any}</span>
                                          </div>
                                       </motion.div>
                                       <span className="text-[9px] font-bold text-zinc-600 group-hover:text-zinc-400 truncate w-full text-center">{day.split(',')[0]}</span>
@@ -307,11 +307,11 @@ export default function AdminDashboard() {
 
                        <div className="grid grid-cols-2 gap-8">
                            <div>
-                              <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Monthly Peak</h3>
-                              <p className="text-2xl font-black text-white">{analyticsData?.volumeByMonth ? Object.entries(analyticsData.volumeByMonth as Record<string, number>).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A' : '...'}</p>
+                              <h3 className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest mb-2">Monthly Peak</h3>
+                              <p className="text-2xl font-black text-[var(--text-main)]">{analyticsData?.volumeByMonth ? Object.entries(analyticsData.volumeByMonth as Record<string, number>).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A' : '...'}</p>
                            </div>
                            <div>
-                              <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Total Managed</h3>
+                              <h3 className="text-[10px] font-bold text-[var(--text-dim)] uppercase tracking-widest mb-2">Total Managed</h3>
                               <p className="text-2xl font-black text-emerald-400">{analyticsData?.totalBookings || '0'}</p>
                            </div>
                        </div>
@@ -320,8 +320,8 @@ export default function AdminDashboard() {
 
                  <div className="glass-panel p-8 rounded-3xl min-h-[400px]">
                     <div className="flex items-center justify-between mb-8">
-                       <h2 className="text-2xl font-bold text-white flex items-center gap-2"><PieChart className="w-6 h-6 text-blue-500" /> Specialty Mix</h2>
-                       <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Case Distribution</span>
+                       <h2 className="text-2xl font-bold text-[var(--text-main)] flex items-center gap-2"><PieChart className="w-6 h-6 text-blue-500" /> Specialty Mix</h2>
+                       <span className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-widest">Case Distribution</span>
                     </div>
                     
                     <div className="space-y-4">
@@ -331,9 +331,9 @@ export default function AdminDashboard() {
                              <div key={i} className="flex flex-col gap-1.5">
                                 <div className="flex justify-between items-center text-sm">
                                    <span className="font-bold text-zinc-300">{spec}</span>
-                                   <span className="font-mono text-zinc-500">{count} cases ({percentage}%)</span>
+                                   <span className="font-mono text-[var(--text-dim)]">{count} cases ({percentage}%)</span>
                                 </div>
-                                <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
+                                <div className="h-1.5 w-full bg-[var(--bg-card)] rounded-full overflow-hidden">
                                    <motion.div 
                                       initial={{ width: 0 }}
                                       animate={{ width: `${percentage}%` }}
@@ -354,9 +354,9 @@ export default function AdminDashboard() {
                     <h3 className="text-sm font-bold text-zinc-400 uppercase mb-4">Daily Volume</h3>
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                        {analyticsData?.volumeByDay && Object.entries(analyticsData.volumeByDay as Record<string, number>).sort((a,b) => new Date(b[0]).getTime() - new Date(a[0]).getTime()).map(([day, count], i) => (
-                          <div key={i} className="flex justify-between text-sm py-1 border-b border-white/5 last:border-0 text-zinc-300">
+                          <div key={i} className="flex justify-between text-sm py-1 border-b border-[var(--border-main)] last:border-0 text-zinc-300">
                              <span>{day}</span>
-                             <span className="font-bold text-white">{count}</span>
+                             <span className="font-bold text-[var(--text-main)]">{count}</span>
                           </div>
                        ))}
                     </div>
@@ -365,9 +365,9 @@ export default function AdminDashboard() {
                     <h3 className="text-sm font-bold text-zinc-400 uppercase mb-4">Monthly Volume</h3>
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                        {analyticsData?.volumeByMonth && Object.entries(analyticsData.volumeByMonth as Record<string, number>).map(([month, count], i) => (
-                          <div key={i} className="flex justify-between text-sm py-1 border-b border-white/5 last:border-0 text-zinc-300">
+                          <div key={i} className="flex justify-between text-sm py-1 border-b border-[var(--border-main)] last:border-0 text-zinc-300">
                              <span>{month}</span>
-                             <span className="font-bold text-white">{count}</span>
+                             <span className="font-bold text-[var(--text-main)]">{count}</span>
                           </div>
                        ))}
                     </div>
@@ -376,9 +376,9 @@ export default function AdminDashboard() {
                     <h3 className="text-sm font-bold text-zinc-400 uppercase mb-4">Yearly Volume</h3>
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                        {analyticsData?.volumeByYear && Object.entries(analyticsData.volumeByYear as Record<string, number>).map(([year, count], i) => (
-                          <div key={i} className="flex justify-between text-sm py-1 border-b border-white/5 last:border-0 text-zinc-300">
+                          <div key={i} className="flex justify-between text-sm py-1 border-b border-[var(--border-main)] last:border-0 text-zinc-300">
                              <span>{year}</span>
-                             <span className="font-bold text-white">{count}</span>
+                             <span className="font-bold text-[var(--text-main)]">{count}</span>
                           </div>
                        ))}
                     </div>

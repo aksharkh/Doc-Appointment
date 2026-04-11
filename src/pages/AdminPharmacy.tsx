@@ -29,7 +29,7 @@ export default function AdminPharmacy() {
     <div className="space-y-8 flex flex-col h-full">
        <div className="flex flex-col md:flex-row justify-between md:items-end gap-4 shrink-0">
           <div>
-             <h1 className="text-3xl font-bold tracking-tight text-white mb-1">Pharmacy Fulfillment Queue</h1>
+             <h1 className="text-3xl font-bold tracking-tight text-[var(--text-main)] mb-1">Pharmacy Fulfillment Queue</h1>
              <p className="text-zinc-400">Live Rx orders pushed directly from active clinical encounters.</p>
           </div>
           <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-2xl">
@@ -44,11 +44,11 @@ export default function AdminPharmacy() {
        <div className="flex-1 min-h-[500px] grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* ACTION QUEUE: PENDING PREP */}
-          <div className="bg-zinc-900 border border-white/5 rounded-3xl p-6 flex flex-col shadow-2xl relative overflow-hidden">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-3xl p-6 flex flex-col shadow-2xl relative overflow-hidden">
              
-             <div className="flex items-center gap-2 mb-6 border-b border-white/5 pb-4">
+             <div className="flex items-center gap-2 mb-6 border-b border-[var(--border-main)] pb-4">
                 <Clock className="w-5 h-5 text-amber-500" />
-                <h2 className="text-xl font-bold text-white tracking-widest uppercase">Action Required</h2>
+                <h2 className="text-xl font-bold text-[var(--text-main)] tracking-widest uppercase">Action Required</h2>
              </div>
              
              <div className="flex-1 overflow-y-auto space-y-4 pr-2">
@@ -64,7 +64,7 @@ export default function AdminPharmacy() {
                       >
                          <div className="flex justify-between items-start mb-4">
                             <div>
-                               <p className="text-2xl font-black text-white">{item.rx.name}</p>
+                               <p className="text-2xl font-black text-[var(--text-main)]">{item.rx.name}</p>
                                <p className="text-amber-400 font-bold uppercase tracking-widest text-xs mt-1">Sig: {item.rx.instructions}</p>
                             </div>
                             <div className="text-right">
@@ -88,7 +88,7 @@ export default function AdminPharmacy() {
                 {pendingQueue.length === 0 && (
                    <div className="h-full flex flex-col items-center justify-center opacity-30 text-center p-12">
                       <CheckCheck className="w-20 h-20 text-emerald-500 mb-4" />
-                      <p className="text-2xl font-bold text-white mb-2">Queue Empty</p>
+                      <p className="text-2xl font-bold text-[var(--text-main)] mb-2">Queue Empty</p>
                       <p className="text-zinc-400 font-bold max-w-sm">All prescribed medications have been prepared. Waiting for next encounter order.</p>
                    </div>
                 )}
@@ -96,11 +96,11 @@ export default function AdminPharmacy() {
           </div>
 
           {/* READY FOR PICKUP QUEUE */}
-          <div className="bg-zinc-950/50 border border-white/5 rounded-3xl p-6 flex flex-col shadow-inner">
+          <div className="bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-3xl p-6 flex flex-col shadow-inner">
              
-             <div className="flex items-center gap-2 mb-6 border-b border-white/5 pb-4">
+             <div className="flex items-center gap-2 mb-6 border-b border-[var(--border-main)] pb-4">
                 <CheckCheck className="w-5 h-5 text-emerald-500" />
-                <h2 className="text-xl font-bold text-white tracking-widest uppercase opacity-50">Ready at Checkout</h2>
+                <h2 className="text-xl font-bold text-[var(--text-main)] tracking-widest uppercase opacity-50">Ready at Checkout</h2>
              </div>
              
              <div className="flex-1 overflow-y-auto space-y-3 pr-2">
@@ -112,15 +112,15 @@ export default function AdminPharmacy() {
                          initial={{ opacity: 0, x: -20 }}
                          animate={{ opacity: 1, x: 0 }}
                          exit={{ opacity: 0, scale: 0.95 }}
-                         className="bg-zinc-900 border-l-4 border-emerald-500 rounded-xl p-4 flex justify-between items-center opacity-80"
+                         className="bg-[var(--bg-card)] border-l-4 border-emerald-500 rounded-xl p-4 flex justify-between items-center opacity-80"
                       >
                          <div>
                             <p className="text-lg font-bold text-zinc-300 line-through decoration-emerald-500/50 opacity-50">{item.rx.name}</p>
-                            <p className="text-sm text-zinc-500 font-bold uppercase tracking-widest leading-none mt-1">Patient: {item.booking.name}</p>
+                            <p className="text-sm text-[var(--text-dim)] font-bold uppercase tracking-widest leading-none mt-1">Patient: {item.booking.name}</p>
                          </div>
                          <button 
                             onClick={() => updateRxStatus(item.booking.id, item.index, 'dispensed')}
-                            className="text-xs font-bold text-zinc-400 bg-zinc-800 px-3 py-1.5 rounded-lg hover:text-white transition-colors border border-white/5"
+                            className="text-xs font-bold text-zinc-400 bg-zinc-800 px-3 py-1.5 rounded-lg hover:text-[var(--text-main)] transition-colors border border-[var(--border-main)]"
                          >
                             Clear (Dispensed)
                          </button>

@@ -13,7 +13,12 @@ export default function AdminLogin() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (login(password)) {
-      navigate('/admin');
+      const state = useBookingStore.getState();
+      if (state.authRole === 'pharmacy') {
+        navigate('/pharmacy-fulfillment');
+      } else {
+        navigate('/admin');
+      }
     } else {
       setError(true);
       setTimeout(() => setError(false), 2000);
@@ -21,7 +26,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--bg-main)] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-900/20 rounded-full blur-[120px] pointer-events-none" />
       
@@ -34,8 +39,8 @@ export default function AdminLogin() {
           <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(52,211,153,0.3)] mb-6">
             <Activity className="w-8 h-8 text-zinc-950" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Staff Portal</h1>
-          <p className="text-zinc-500 mt-2">Enter your designated PIN or password</p>
+          <h1 className="text-3xl font-bold text-[var(--text-main)] tracking-tight">Staff Portal</h1>
+          <p className="text-[var(--text-dim)] mt-2">Enter your designated PIN or password</p>
           <p className="text-emerald-500/50 text-xs mt-1">(Hint: Use "admin123")</p>
         </div>
 
@@ -50,7 +55,7 @@ export default function AdminLogin() {
                 type="password" 
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className={`w-full bg-zinc-950/50 border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-xl pl-12 pr-4 py-4 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-mono text-lg tracking-widest`}
+                className={`w-full bg-[var(--bg-main)]/50 border ${error ? 'border-red-500/50' : 'border-[var(--border-main)]'} rounded-xl pl-12 pr-4 py-4 text-[var(--text-main)] placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-mono text-lg tracking-widest`}
                 placeholder="••••••••"
                 autoFocus
               />

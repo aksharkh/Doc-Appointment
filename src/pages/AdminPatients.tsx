@@ -75,17 +75,17 @@ export default function AdminPatients() {
        {/* Header & Search */}
        <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
           <div>
-             <h1 className="text-3xl font-bold tracking-tight text-white mb-1">Patient Directory</h1>
+             <h1 className="text-3xl font-bold tracking-tight text-[var(--text-main)] mb-1">Patient Directory</h1>
              <p className="text-zinc-400">Search and review patient medical histories and CRM data.</p>
           </div>
           <div className="relative w-full md:w-72">
-             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)]" />
              <input 
                 type="text" 
                 placeholder="Search name or email..." 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full bg-zinc-900 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:ring-1 focus:border-emerald-500/50 outline-none"
+                className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl py-2 pl-10 pr-4 text-sm text-[var(--text-main)] focus:ring-1 focus:border-emerald-500/50 outline-none"
              />
           </div>
        </div>
@@ -105,12 +105,12 @@ export default function AdminPatients() {
                         {patient.name.charAt(0)}
                      </div>
                      <div>
-                        <h3 className="font-bold text-white group-hover:text-emerald-300 transition-colors">{patient.name}</h3>
-                        <p className="text-xs text-zinc-500">{vCount} Visit{vCount !== 1 ? 's' : ''} on record</p>
+                        <h3 className="font-bold text-[var(--text-main)] group-hover:text-emerald-300 transition-colors">{patient.name}</h3>
+                        <p className="text-xs text-[var(--text-dim)]">{vCount} Visit{vCount !== 1 ? 's' : ''} on record</p>
                      </div>
                   </div>
                   
-                  <div className="space-y-2 mt-2 pt-4 border-t border-white/5 text-sm">
+                  <div className="space-y-2 mt-2 pt-4 border-t border-[var(--border-main)] text-sm">
                      <div className="flex justify-between items-center text-zinc-400">
                         <span className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5" /> Latest Specialty</span>
                         <span className="text-zinc-200">{patient.specialty}</span>
@@ -127,7 +127,7 @@ export default function AdminPatients() {
           })}
           
           {uniquePatients.length === 0 && (
-            <div className="col-span-full py-20 text-center text-zinc-500">
+            <div className="col-span-full py-20 text-center text-[var(--text-dim)]">
                No patients found matching '{searchTerm}'.
             </div>
           )}
@@ -141,23 +141,23 @@ export default function AdminPatients() {
                <motion.div 
                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                  onClick={() => setActivePatient(null)}
-                 className="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm"
+                 className="absolute inset-0 bg-[var(--bg-main)]/80 backdrop-blur-sm"
                />
 
                <motion.div 
                  initial={{ scale: 0.95, opacity: 0, y: 20 }}
                  animate={{ scale: 1, opacity: 1, y: 0 }}
                  exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                 className="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                 className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-main)] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                >
                   {/* Modal Header */}
-                  <div className="p-6 border-b border-white/5 flex items-start justify-between bg-zinc-900/50 shrink-0">
+                  <div className="p-6 border-b border-[var(--border-main)] flex items-start justify-between bg-[var(--bg-card)]/50 shrink-0">
                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-black shadow-lg">
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-[var(--text-main)] text-2xl font-black shadow-lg">
                            {activePatient.name.charAt(0)}
                         </div>
                         <div>
-                           <h2 className="text-2xl font-bold text-white">{activePatient.name}</h2>
+                           <h2 className="text-2xl font-bold text-[var(--text-main)]">{activePatient.name}</h2>
                            <div className="flex gap-4 text-xs font-medium text-zinc-400 mt-1">
                               <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" /> {activePatient.email}</span>
                               <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" /> {activePatient.phone}</span>
@@ -170,10 +170,10 @@ export default function AdminPatients() {
                   </div>
 
                   {/* Tabs */}
-                  <div className="flex border-b border-white/5 bg-zinc-950/50 shrink-0 px-6 gap-6">
-                     <button onClick={()=>setActiveTab('history')} className={`py-4 text-sm font-bold border-b-2 transition-colors ${activeTab==='history' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}>Historical Visits</button>
-                     <button onClick={()=>setActiveTab('profile')} className={`py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab==='profile' ? 'border-amber-500 text-amber-400' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}><AlertTriangle className="w-4 h-4" /> Clinical CRM</button>
-                     <button onClick={()=>setActiveTab('vitals')} className={`py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab==='vitals' ? 'border-red-500 text-red-500' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}><Activity className="w-4 h-4" /> Vitals Tracking</button>
+                  <div className="flex border-b border-[var(--border-main)] bg-[var(--bg-main)]/50 shrink-0 px-6 gap-6">
+                     <button onClick={()=>setActiveTab('history')} className={`py-4 text-sm font-bold border-b-2 transition-colors ${activeTab==='history' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-[var(--text-dim)] hover:text-zinc-300'}`}>Historical Visits</button>
+                     <button onClick={()=>setActiveTab('profile')} className={`py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab==='profile' ? 'border-amber-500 text-amber-400' : 'border-transparent text-[var(--text-dim)] hover:text-zinc-300'}`}><AlertTriangle className="w-4 h-4" /> Clinical CRM</button>
+                     <button onClick={()=>setActiveTab('vitals')} className={`py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab==='vitals' ? 'border-red-500 text-red-500' : 'border-transparent text-[var(--text-dim)] hover:text-zinc-300'}`}><Activity className="w-4 h-4" /> Vitals Tracking</button>
                   </div>
 
                   {/* Modal Content */}
@@ -182,27 +182,27 @@ export default function AdminPatients() {
                      {activeTab === 'history' && (
                         <div className="space-y-6">
                            <div className="grid grid-cols-2 gap-4">
-                              <div className="bg-zinc-950/50 border border-white/5 p-4 rounded-xl">
-                                 <p className="text-xs text-zinc-500 uppercase font-bold tracking-wider mb-1">Insurance Provider</p>
-                                 <p className="text-white font-medium">{activePatient.insurance || 'Uninsured / Self-pay'}</p>
+                              <div className="bg-[var(--bg-main)]/50 border border-[var(--border-main)] p-4 rounded-xl">
+                                 <p className="text-xs text-[var(--text-dim)] uppercase font-bold tracking-wider mb-1">Insurance Provider</p>
+                                 <p className="text-[var(--text-main)] font-medium">{activePatient.insurance || 'Uninsured / Self-pay'}</p>
                               </div>
-                              <div className="bg-zinc-950/50 border border-white/5 p-4 rounded-xl">
-                                 <p className="text-xs text-zinc-500 uppercase font-bold tracking-wider mb-1">Patient Status</p>
+                              <div className="bg-[var(--bg-main)]/50 border border-[var(--border-main)] p-4 rounded-xl">
+                                 <p className="text-xs text-[var(--text-dim)] uppercase font-bold tracking-wider mb-1">Patient Status</p>
                                  <p className="text-emerald-400 font-medium">{activePatient.isNewPatient ? 'Newly Onboarded' : 'Recurring Patient'}</p>
                               </div>
                            </div>
 
                            <div>
-                              <h3 className="text-lg font-bold text-white mb-4">Historical Visits Log</h3>
+                              <h3 className="text-lg font-bold text-[var(--text-main)] mb-4">Historical Visits Log</h3>
                               {loadingHistory ? (
                                  <div className="flex flex-col items-center justify-center py-10">
                                     <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
-                                    <p className="text-zinc-500 text-sm">Syncing records...</p>
+                                    <p className="text-[var(--text-dim)] text-sm">Syncing records...</p>
                                  </div>
                               ) : (
                                  <div className="space-y-3">
                                     {activePatientHistory.map((visit, i) => (
-                                       <div key={i} className="flex flex-col gap-2 p-4 bg-zinc-800/30 border border-white/5 rounded-xl text-sm relative group">
+                                       <div key={i} className="flex flex-col gap-2 p-4 bg-zinc-800/30 border border-[var(--border-main)] rounded-xl text-sm relative group">
                                           <div className="flex items-center justify-between">
                                              <div className="flex items-center gap-2">
                                                 <Clock className="w-4 h-4 text-blue-400" />
@@ -225,7 +225,7 @@ export default function AdminPatients() {
                                           </div>
                                        </div>
                                     ))}
-                                    {activePatientHistory.length === 0 && <p className="text-zinc-500 italic text-center py-4">No records found.</p>}
+                                    {activePatientHistory.length === 0 && <p className="text-[var(--text-dim)] italic text-center py-4">No records found.</p>}
                                  </div>
                               )}
                            </div>
@@ -235,7 +235,7 @@ export default function AdminPatients() {
                      {activeTab === 'profile' && (
                         <div className="space-y-6">
                            <div>
-                              <h3 className="text-lg font-bold text-white mb-2">Update Clinical Base Map</h3>
+                              <h3 className="text-lg font-bold text-[var(--text-main)] mb-2">Update Clinical Base Map</h3>
                               <p className="text-zinc-400 text-sm mb-6">Modify these parameters to sync the patient's global records for cross-referencing in any encounter.</p>
                            </div>
 
@@ -245,7 +245,7 @@ export default function AdminPatients() {
                               </label>
                               <textarea 
                                  rows={2}
-                                 className="w-full bg-zinc-950/50 border border-white/10 rounded-xl p-4 text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none font-medium"
+                                 className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl p-4 text-[var(--text-main)] placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none font-medium"
                                  placeholder="e.g. Penicillin, Peanuts (Comma separated)"
                                  value={editAllergies}
                                  onChange={e => setEditAllergies(e.target.value)}
@@ -258,7 +258,7 @@ export default function AdminPatients() {
                               </label>
                               <textarea 
                                  rows={2}
-                                 className="w-full bg-zinc-950/50 border border-white/10 rounded-xl p-4 text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none font-medium"
+                                 className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl p-4 text-[var(--text-main)] placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none font-medium"
                                  placeholder="e.g. Hypertension, Type 2 Diabetes (Comma separated)"
                                  value={editConditions}
                                  onChange={e => setEditConditions(e.target.value)}
@@ -277,7 +277,7 @@ export default function AdminPatients() {
                      {activeTab === 'vitals' && (
                         <div className="space-y-6">
                            <div>
-                              <h3 className="text-lg font-bold text-white mb-1">Vitals Tracking Log</h3>
+                              <h3 className="text-lg font-bold text-[var(--text-main)] mb-1">Vitals Tracking Log</h3>
                               <p className="text-zinc-400 text-sm mb-6">A historical view of physical vitals retrieved from past clinic encounters.</p>
                            </div>
                            
@@ -285,39 +285,39 @@ export default function AdminPatients() {
                               {loadingHistory ? (
                                  <div className="flex flex-col items-center justify-center py-10">
                                     <Loader2 className="w-8 h-8 text-red-400 animate-spin mb-2" />
-                                    <p className="text-zinc-500 text-sm">Loading vitals flowsheet...</p>
+                                    <p className="text-[var(--text-dim)] text-sm">Loading vitals flowsheet...</p>
                                  </div>
                               ) : (
                                  <>
                                     {activePatientHistory
                                        .filter(v => v.vitals && Object.values(v.vitals).some(val => val !== ''))
                                        .map((visit, i) => (
-                                          <div key={i} className="bg-zinc-950 border border-white/5 rounded-xl p-4">
-                                             <div className="text-sm font-bold text-zinc-500 mb-3 uppercase tracking-widest border-b border-white/5 pb-2">
+                                          <div key={i} className="bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl p-4">
+                                             <div className="text-sm font-bold text-[var(--text-dim)] mb-3 uppercase tracking-widest border-b border-[var(--border-main)] pb-2">
                                                 {visit.date}
                                              </div>
                                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                 {visit.vitals?.bp && (
                                                    <div>
-                                                      <p className="text-xs text-zinc-500 font-medium">BP</p>
+                                                      <p className="text-xs text-[var(--text-dim)] font-medium">BP</p>
                                                       <p className="text-red-400 font-mono font-bold text-lg">{visit.vitals.bp}</p>
                                                    </div>
                                                 )}
                                                 {visit.vitals?.hr && (
                                                    <div>
-                                                      <p className="text-xs text-zinc-500 font-medium">HR</p>
+                                                      <p className="text-xs text-[var(--text-dim)] font-medium">HR</p>
                                                       <p className="text-amber-400 font-mono font-bold text-lg">{visit.vitals.hr} <span className="text-xs text-zinc-600">bpm</span></p>
                                                    </div>
                                                 )}
                                                 {visit.vitals?.temp && (
                                                    <div>
-                                                      <p className="text-xs text-zinc-500 font-medium">Temp</p>
+                                                      <p className="text-xs text-[var(--text-dim)] font-medium">Temp</p>
                                                       <p className="text-blue-400 font-mono font-bold text-lg">{visit.vitals.temp}</p>
                                                    </div>
                                                 )}
                                                 {visit.vitals?.weight && (
                                                    <div>
-                                                      <p className="text-xs text-zinc-500 font-medium">Weight</p>
+                                                      <p className="text-xs text-[var(--text-dim)] font-medium">Weight</p>
                                                       <p className="text-emerald-400 font-mono font-bold text-lg">{visit.vitals.weight}</p>
                                                    </div>
                                                 )}
@@ -325,9 +325,9 @@ export default function AdminPatients() {
                                           </div>
                                     ))}
                                     {activePatientHistory.filter(v => v.vitals).length === 0 && (
-                                       <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl">
+                                       <div className="py-12 text-center border border-dashed border-[var(--border-main)] rounded-2xl">
                                           <Activity className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-                                          <p className="text-zinc-500 font-medium">No vitals documented for this patient.</p>
+                                          <p className="text-[var(--text-dim)] font-medium">No vitals documented for this patient.</p>
                                        </div>
                                     )}
                                  </>

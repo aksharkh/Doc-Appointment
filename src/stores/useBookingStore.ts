@@ -80,6 +80,7 @@ interface BookingState {
   bookings: BookingData[];
   adminBlockedSlots: Record<string, string[]>;
   isAuthenticated: boolean;
+  authRole: 'doctor' | 'pharmacy' | 'frontdesk' | null;
   settings: ClinicSettings;
   isLoading: boolean;
   error: string | null;
@@ -104,6 +105,8 @@ interface BookingState {
   getActiveQueue: () => Promise<BookingData[]>;
   updatePatientProfile: (email: string, profileData: { chronicConditions?: string[]; allergies?: string[] }) => Promise<void>;
   fetchAnalytics: () => Promise<void>;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -111,6 +114,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   bookings: [],
   adminBlockedSlots: {},
   isAuthenticated: false,
+  authRole: null,
   isLoading: false,
   error: null,
   analyticsData: null,
@@ -119,16 +123,34 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     emergencyBlockAll: false,
     delayIndicator: 'On Time',
   },
+  isDarkMode: true, // Default to dark
+  toggleDarkMode: () => {
+    const next = !get().isDarkMode;
+    set({ isDarkMode: next });
+    if (next) {
+      document.body.classList.remove('light-mode');
+    } else {
+      document.body.classList.add('light-mode');
+    }
+  },
 
   login: (password) => {
     if (password === 'admin123') {
-      set({ isAuthenticated: true });
+      set({ isAuthenticated: true, authRole: 'doctor' });
+      return true;
+    }
+    if (password === 'pharmacy123') {
+      set({ isAuthenticated: true, authRole: 'pharmacy' });
+      return true;
+    }
+    if (password === 'staff123') {
+      set({ isAuthenticated: true, authRole: 'frontdesk' });
       return true;
     }
     return false;
   },
 
-  logout: () => set({ isAuthenticated: false }),
+  logout: () => set({ isAuthenticated: false, authRole: null }),
 
   // ── Fetch all bookings from backend on load ──────────────────────────────
   fetchAllBookings: async () => {

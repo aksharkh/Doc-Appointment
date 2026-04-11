@@ -48,7 +48,7 @@ export default function WhatsAppBotSimulation({ bookingId, data, onClose }: Prop
                        <p>🎫 *Reference:* ${bookingId}</p>
                     </div>
 
-                    <p className="text-xs text-zinc-500 italic mt-2">Reply with <span className="font-bold text-teal-600">CANCEL</span> or <span className="font-bold text-teal-600">RESCHEDULE</span> to modify this booking. If this is an emergency, dial 911 immediately.</p>
+                    <p className="text-xs text-[var(--text-dim)] italic mt-2">Reply with <span className="font-bold text-teal-600">CANCEL</span> or <span className="font-bold text-teal-600">RESCHEDULE</span> to modify this booking. If this is an emergency, dial 911 immediately.</p>
                 </div>
             )
         }]);
@@ -75,7 +75,7 @@ export default function WhatsAppBotSimulation({ bookingId, data, onClose }: Prop
           className="relative w-full max-w-sm sm:max-w-md h-[85vh] sm:h-[750px] bg-[#EFEAE2] flex flex-col rounded-[2rem] overflow-hidden shadow-2xl border-4 border-zinc-900"
        >
           {/* WhatsApp Header area */}
-          <div className="bg-[#00A884] text-white pt-6 pb-3 px-4 flex items-center justify-between shadow-md shrink-0 relative z-10">
+          <div className="bg-[#00A884] text-[var(--text-main)] pt-6 pb-3 px-4 flex items-center justify-between shadow-md shrink-0 relative z-10">
               <div className="flex items-center gap-2">
                  <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors flex -ml-2">
                     <ChevronLeft className="w-6 h-6" />
@@ -89,9 +89,9 @@ export default function WhatsAppBotSimulation({ bookingId, data, onClose }: Prop
                  <div className="ml-1 cursor-pointer">
                     <div className="flex items-center gap-1">
                         <h2 className="font-semibold text-base leading-tight">DocBook Hospital</h2>
-                        <BadgeCheck className="w-4 h-4 text-white fill-emerald-500" />
+                        <BadgeCheck className="w-4 h-4 text-[var(--text-main)] fill-emerald-500" />
                     </div>
-                    <p className="text-[11px] text-white/80 leading-tight">Official Corporate Account</p>
+                    <p className="text-[11px] text-[var(--text-main)]/80 leading-tight">Official Corporate Account</p>
                  </div>
               </div>
               <div className="flex items-center gap-4">
@@ -133,7 +133,7 @@ export default function WhatsAppBotSimulation({ bookingId, data, onClose }: Prop
                           </div>
 
                           <div className="absolute bottom-1 right-2 flex items-center gap-1">
-                             <span className="text-[10px] text-zinc-500">{msg.time}</span>
+                             <span className="text-[10px] text-[var(--text-dim)]">{msg.time}</span>
                              {!msg.isBot && <CheckCheck className={`w-3.5 h-3.5 ${msg.status === 'read' ? 'text-blue-500' : 'text-zinc-400'}`} />}
                           </div>
                        </div>
@@ -162,12 +162,12 @@ export default function WhatsAppBotSimulation({ bookingId, data, onClose }: Prop
           {/* Chat Footer */}
           <div className="bg-[#F0F2F5] p-2 flex items-end gap-2 shrink-0 z-10 bottom-0">
               <div className="flex-1 bg-white rounded-2xl min-h-[44px] flex items-center px-4 gap-4 shadow-sm pb-1">
-                 <SmilePlus className="w-6 h-6 text-zinc-500 cursor-pointer" />
+                 <SmilePlus className="w-6 h-6 text-[var(--text-dim)] cursor-pointer" />
                  <input type="text" placeholder="Type a message" className="flex-1 bg-transparent py-3 focus:outline-none placeholder-zinc-500 text-[15px]" disabled />
-                 <Paperclip className="w-6 h-6 text-zinc-500 cursor-pointer" />
+                 <Paperclip className="w-6 h-6 text-[var(--text-dim)] cursor-pointer" />
               </div>
               <button className="w-11 h-11 bg-[#00A884] rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform active:scale-95">
-                 <Mic className="w-5 h-5 text-white" />
+                 <Mic className="w-5 h-5 text-[var(--text-main)]" />
               </button>
           </div>
        </motion.div>

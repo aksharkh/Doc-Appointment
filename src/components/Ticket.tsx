@@ -57,16 +57,16 @@ export default function Ticket({ bookingId, data }: TicketProps) {
           <div className="p-8 pb-10 bg-gradient-to-b from-zinc-800/80 to-zinc-900/90 relative">
             <div className="flex justify-between items-start mb-8">
               <div>
-                <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold mb-1">{data.token ? 'Queue Token' : 'Appointment ID'}</p>
+                <p className="text-xs uppercase tracking-widest text-[var(--text-dim)] font-bold mb-1">{data.token ? 'Queue Token' : 'Appointment ID'}</p>
                 <p className={`font-mono font-semibold tracking-wider ${data.token ? 'text-emerald-400 text-2xl' : 'text-zinc-100'}`}>{data.token || bookingId}</p>
-                {data.token && <p className="text-[10px] text-zinc-500 font-bold uppercase mt-1">Ref: {bookingId.split('-')[1]}</p>}
+                {data.token && <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase mt-1">Ref: {bookingId.split('-')[1]}</p>}
               </div>
               <div className="bg-zinc-800/80 p-2 rounded-xl border border-zinc-700/50">
                 <QRCodeSVG value={qrValue} size={64} fgColor="#000000" bgColor="#ffffff" className="rounded-lg p-1 bg-white" />
               </div>
             </div>
 
-            <h3 className="text-2xl font-bold text-white mb-6">Dr. Smith's Clinic</h3>
+            <h3 className="text-2xl font-bold text-[var(--text-main)] mb-6">Dr. Smith's Clinic</h3>
 
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -116,15 +116,15 @@ export default function Ticket({ bookingId, data }: TicketProps) {
               </div>
             </div>
             
-            <div className="absolute -bottom-4 -left-4 w-8 h-8 rounded-full bg-zinc-950 border-r border-t border-white/5 blur-[0.5px]"></div>
-            <div className="absolute -bottom-4 -right-4 w-8 h-8 rounded-full bg-zinc-950 border-l border-t border-white/5 blur-[0.5px]"></div>
+            <div className="absolute -bottom-4 -left-4 w-8 h-8 rounded-full bg-[var(--bg-main)] border-r border-t border-[var(--border-main)] blur-[0.5px]"></div>
+            <div className="absolute -bottom-4 -right-4 w-8 h-8 rounded-full bg-[var(--bg-main)] border-l border-t border-[var(--border-main)] blur-[0.5px]"></div>
           </div>
 
           <div className="relative flex justify-center w-full my-[-2px] z-10">
             <div className="w-[calc(100%-3rem)] border-t-[3px] border-dotted border-zinc-700/80"></div>
           </div>
 
-          <div className="p-6 bg-zinc-900/90 relative flex flex-col gap-3 items-center">
+          <div className="p-6 bg-[var(--bg-card)]/90 relative flex flex-col gap-3 items-center">
              
              <div className="w-full flex gap-2 flex-col sm:flex-row">
                 <button 
@@ -142,7 +142,7 @@ export default function Ticket({ bookingId, data }: TicketProps) {
                 </button>
              </div>
              
-             <p className="text-xs text-zinc-500 mt-2">Please present this QR code at the reception desk.</p>
+             <p className="text-xs text-[var(--text-dim)] mt-2">Please present this QR code at the reception desk.</p>
           </div>
         </div>
       </div>

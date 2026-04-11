@@ -12,7 +12,9 @@ import AdminSettings from './pages/AdminSettings';
 import PatientDashboard from './pages/PatientDashboard';
 import AdminEncounter from './pages/AdminEncounter';
 import AdminPharmacy from './pages/AdminPharmacy';
+import PharmacyPortal from './pages/PharmacyPortal';
 import LiveDisplay from './pages/LiveDisplay';
+import ThemeToggle from './components/ThemeToggle';
 import { useBookingStore } from './stores/useBookingStore';
 
 // Protected Route Component
@@ -27,7 +29,7 @@ const EmergencyBanner = () => {
    const { emergencyBlockAll } = useBookingStore(state => state.settings);
    if (!emergencyBlockAll) return null;
    return (
-      <div className="w-full bg-red-500 text-white flex items-center justify-center p-3 text-sm font-bold z-50 fixed top-0 left-0 right-0 shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse gap-2">
+      <div className="w-full bg-red-500 text-[var(--text-main)] flex items-center justify-center p-3 text-sm font-bold z-50 fixed top-0 left-0 right-0 shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse gap-2">
          <AlertTriangle className="w-5 h-5" />
          CLINIC IS CURRENTLY IN EMERGENCY LOCKDOWN. NO NEW APPOINTMENTS.
       </div>
@@ -51,14 +53,14 @@ const ClientPage = () => {
   
   return (
   <div className={`min-h-screen relative overflow-hidden flex flex-col items-center pt-${emergencyBlockAll ? '12' : (delayIndicator !== 'On Time' ? '8' : '0')}`}>
-    <div className="fixed inset-0 z-0 bg-zinc-950">
+    <div className="fixed inset-0 z-0 bg-[var(--bg-main)]">
       <div className={`absolute top-[-10%] left-[-10%] w-[40%] h-[40%] blur-[150px] rounded-full pointer-events-none transition-colors duration-1000 ${emergencyBlockAll ? 'bg-red-700/20' : 'bg-emerald-700/20'}`} />
       <div className={`absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] blur-[150px] rounded-full pointer-events-none transition-colors duration-1000 ${emergencyBlockAll ? 'bg-orange-800/20' : 'bg-teal-800/20'}`} />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
     </div>
 
     <main className="relative z-10 w-full flex-grow flex flex-col">
-      <nav className="w-full h-20 border-b border-white/5 bg-zinc-950/50 backdrop-blur-xl flex items-center justify-between px-6 lg:px-12 sticky top-0 z-50">
+      <nav className="w-full h-20 border-b border-[var(--border-main)] bg-[var(--bg-main)]/50 backdrop-blur-xl flex items-center justify-between px-6 lg:px-12 sticky top-0 z-50">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -67,17 +69,21 @@ const ClientPage = () => {
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-zinc-950 font-black text-xl shadow-[0_0_20px_rgba(52,211,153,0.3)]">
             D
           </div>
-          <span className="text-xl font-bold tracking-tight text-white hidden sm:block">DocBook.</span>
+          <span className="text-xl font-bold tracking-tight text-[var(--text-main)] hidden sm:block">DocBook.</span>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           className="flex gap-4"
         >
-           <Link to="/patient/dashboard" className="text-sm font-bold text-white bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">
+           <Link to="/patient/dashboard" className="text-sm font-bold text-[var(--text-main)] bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">
              Patient Portal
            </Link>
-           <Link to="/admin" className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors flex items-center">
+           <ThemeToggle />
+           <Link to="/pharmacy-fulfillment" className="text-sm font-bold text-emerald-400 bg-emerald-400/5 border border-emerald-400/20 px-4 py-2 rounded-lg hover:bg-emerald-400/10 transition-colors">
+             Pharmacy Entrance
+           </Link>
+           <Link to="/admin" className="text-sm font-medium text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors flex items-center">
              Staff Entry
            </Link>
         </motion.div>
@@ -88,7 +94,7 @@ const ClientPage = () => {
       </div>
     </main>
     
-    <footer className="relative z-10 w-full py-6 border-t border-white/5 text-center text-zinc-600 text-sm font-medium">
+    <footer className="relative z-10 w-full py-6 border-t border-[var(--border-main)] text-center text-zinc-600 text-sm font-medium">
       &copy; {new Date().getFullYear()} DocBook. Premium patient experience.
     </footer>
   </div>
@@ -112,6 +118,7 @@ function App() {
           <Route path="/" element={<ClientPage />} />
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
           <Route path="/display" element={<LiveDisplay />} />
+          <Route path="/pharmacy-fulfillment" element={<PharmacyPortal />} />
           
           {/* Admin Application */}
           <Route path="/admin/login" element={<AdminLogin />} />

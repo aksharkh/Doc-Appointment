@@ -63,7 +63,9 @@ export default function BookingFlow() {
      name: '', 
      phone: '', 
      email: '', 
-     reason: '' 
+     reason: '',
+     location: '',
+     bookingFor: 'self'
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -143,7 +145,7 @@ export default function BookingFlow() {
            <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/20">
               <Stethoscope className="w-12 h-12 text-red-500" />
            </div>
-           <h2 className="text-3xl font-bold text-white mb-4">Clinic Unavailable</h2>
+           <h2 className="text-3xl font-bold text-[var(--text-main)] mb-4">Clinic Unavailable</h2>
            <p className="text-zinc-400">Due to an unforeseen medical emergency, the clinic has temporarily suspended all new appointments. Please check back later or call our emergency line at 911.</p>
         </div>
      )
@@ -154,7 +156,7 @@ export default function BookingFlow() {
       
       <AnimatePresence mode="wait">
         {step === 'triage' && (
-           <motion.div initial={{opacity: 0, y:-10}} animate={{opacity: 1, y: 0}} exit={{opacity:0, y:-10}} className="mb-6 flex flex-col sm:flex-row items-center gap-4 bg-zinc-900 border border-white/5 rounded-2xl p-4 shadow-lg w-full">
+           <motion.div initial={{opacity: 0, y:-10}} animate={{opacity: 1, y: 0}} exit={{opacity:0, y:-10}} className="mb-6 flex flex-col sm:flex-row items-center gap-4 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 shadow-lg w-full">
               <div className="flex items-center gap-3 w-full sm:w-auto">
                  <div className="relative flex h-3 w-3">
                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -164,12 +166,12 @@ export default function BookingFlow() {
               </div>
               <div className="flex flex-1 w-full justify-between sm:justify-end gap-6 text-sm">
                  <div className="flex flex-col sm:items-end">
-                    <span className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Currently Serving</span>
-                    <span className="text-white font-mono font-bold bg-zinc-800 px-2 mt-0.5 rounded border border-white/5">{currentlyServing?.token || 'Standby'}</span>
+                    <span className="text-[var(--text-dim)] font-bold text-xs uppercase tracking-wider">Currently Serving</span>
+                    <span className="text-[var(--text-main)] font-mono font-bold bg-zinc-800 px-2 mt-0.5 rounded border border-[var(--border-main)]">{currentlyServing?.token || 'Standby'}</span>
                  </div>
                  <div className="flex flex-col sm:items-end">
-                    <span className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Waiting Room</span>
-                    <span className="text-white font-bold bg-zinc-800 px-2 mt-0.5 rounded border border-white/5">{waitingCount} Patient{waitingCount !== 1 ? 's' : ''}</span>
+                    <span className="text-[var(--text-dim)] font-bold text-xs uppercase tracking-wider">Waiting Room</span>
+                    <span className="text-[var(--text-main)] font-bold bg-zinc-800 px-2 mt-0.5 rounded border border-[var(--border-main)]">{waitingCount} Patient{waitingCount !== 1 ? 's' : ''}</span>
                  </div>
               </div>
            </motion.div>
@@ -188,7 +190,7 @@ export default function BookingFlow() {
               {step !== 'triage' && (
                 <button 
                   onClick={goBack}
-                  className="p-2 bg-zinc-800/50 hover:bg-zinc-800 rounded-full transition-colors border border-white/5"
+                  className="p-2 bg-zinc-800/50 hover:bg-zinc-800 rounded-full transition-colors border border-[var(--border-main)]"
                 >
                   <ArrowLeft className="w-5 h-5 text-zinc-300" />
                 </button>
@@ -205,14 +207,14 @@ export default function BookingFlow() {
             {(formData.specialty || selectedDate || selectedSlot) && (
                <div className="flex flex-wrap items-center gap-2 mt-4 text-sm font-medium text-zinc-400 pl-2">
                   {formData.specialty && (
-                     <span className="flex items-center gap-1.5 bg-zinc-800/50 px-3 py-1.5 rounded-full border border-white/5 truncate max-w-[150px]">
+                     <span className="flex items-center gap-1.5 bg-zinc-800/50 px-3 py-1.5 rounded-full border border-[var(--border-main)] truncate max-w-[150px]">
                         <Building className="w-4 h-4 text-blue-400 flex-shrink-0" /> {formData.specialty}
                      </span>
                   )}
                   {selectedDate && (
                     <>
                       <ChevronRight className="w-4 h-4 opacity-30" />
-                      <span className="flex items-center gap-1.5 bg-zinc-800/50 px-3 py-1.5 rounded-full border border-white/5">
+                      <span className="flex items-center gap-1.5 bg-zinc-800/50 px-3 py-1.5 rounded-full border border-[var(--border-main)]">
                         <CalendarIcon className="w-4 h-4 text-emerald-400" />
                         {format(selectedDate, 'MMM d')}
                       </span>
@@ -221,7 +223,7 @@ export default function BookingFlow() {
                   {selectedSlot && step === 'details' && (
                      <>
                       <ChevronRight className="w-4 h-4 opacity-30" />
-                      <span className="flex items-center gap-1.5 bg-zinc-800/50 px-3 py-1.5 rounded-full border border-white/5">
+                      <span className="flex items-center gap-1.5 bg-zinc-800/50 px-3 py-1.5 rounded-full border border-[var(--border-main)]">
                         <Clock className="w-4 h-4 text-purple-400" />
                         {selectedSlot.time}
                       </span>
@@ -249,11 +251,11 @@ export default function BookingFlow() {
                    <div className="space-y-4">
                       <label className="text-sm font-bold text-zinc-300 pl-1 uppercase tracking-widest">Consultation Type</label>
                       <div className="grid grid-cols-2 gap-4">
-                         <button type="button" onClick={() => setFormData({...formData, type: 'in-person'})} className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-3 ${formData.type === 'in-person' ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-zinc-900 border-white/5 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'}`}>
+                         <button type="button" onClick={() => setFormData({...formData, type: 'in-person'})} className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-3 ${formData.type === 'in-person' ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-[var(--bg-card)] border-[var(--border-main)] text-[var(--text-dim)] hover:text-zinc-300 hover:bg-zinc-800'}`}>
                             <Stethoscope className="w-8 h-8" />
                             <span className="font-bold">In-Person Clinic</span>
                          </button>
-                         <button type="button" onClick={() => setFormData({...formData, type: 'telehealth'})} className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-3 ${formData.type === 'telehealth' ? 'bg-blue-500/10 border-blue-500/50 text-blue-400' : 'bg-zinc-900 border-white/5 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'}`}>
+                         <button type="button" onClick={() => setFormData({...formData, type: 'telehealth'})} className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-3 ${formData.type === 'telehealth' ? 'bg-blue-500/10 border-blue-500/50 text-blue-400' : 'bg-[var(--bg-card)] border-[var(--border-main)] text-[var(--text-dim)] hover:text-zinc-300 hover:bg-zinc-800'}`}>
                             <Video className="w-8 h-8" />
                             <span className="font-bold">Telehealth Video</span>
                          </button>
@@ -267,7 +269,7 @@ export default function BookingFlow() {
                             <button 
                                key={spec} type="button" 
                                onClick={() => setFormData({...formData, specialty: spec})}
-                               className={`p-3 rounded-xl border text-sm font-bold transition-colors ${formData.specialty === spec ? 'bg-zinc-100 text-zinc-950 border-white' : 'bg-zinc-900 border-white/5 text-zinc-400 hover:bg-zinc-800'}`}
+                               className={`p-3 rounded-xl border text-sm font-bold transition-colors ${formData.specialty === spec ? 'bg-zinc-100 text-zinc-950 border-white' : 'bg-[var(--bg-card)] border-[var(--border-main)] text-zinc-400 hover:bg-zinc-800'}`}
                             >
                                {spec}
                             </button>
@@ -275,7 +277,7 @@ export default function BookingFlow() {
                       </div>
                    </div>
 
-                   <button type="submit" disabled={!formData.specialty} className="w-full py-4 text-emerald-950 font-bold text-lg bg-emerald-400 rounded-xl hover:bg-emerald-300 transition-colors disabled:opacity-50 disabled:bg-zinc-700 disabled:text-zinc-500 flex items-center justify-center gap-2">
+                   <button type="submit" disabled={!formData.specialty} className="w-full py-4 text-emerald-950 font-bold text-lg bg-emerald-400 rounded-xl hover:bg-emerald-300 transition-colors disabled:opacity-50 disabled:bg-zinc-700 disabled:text-[var(--text-dim)] flex items-center justify-center gap-2">
                        Continue to Scheduling <ChevronRight className="w-5 h-5" />
                    </button>
                 </form>
@@ -306,18 +308,19 @@ export default function BookingFlow() {
                       className={`relative flex flex-col items-center justify-center p-6 glass-panel rounded-2xl transition-all group overflow-hidden ${availableCount === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-500/30 hover:shadow-[0_0_25px_rgba(52,211,153,0.1)]'}`}
                     >
                       {availableCount === 0 && (
-                         <div className="absolute inset-0 bg-red-950/20 backdrop-blur-[1px] flex flex-col items-center justify-center z-10 cursor-not-allowed">
-                            <span className="text-red-400 font-bold tracking-widest text-sm bg-zinc-950/80 px-4 py-1 rounded-full border border-red-500/30">FULL</span>
+                         <div className="absolute inset-0 bg-red-950/40 backdrop-blur-[2px] flex flex-col items-center justify-center z-10">
+                            <span className="text-red-400 font-bold tracking-widest text-sm bg-[var(--bg-main)]/90 px-4 py-1 rounded-full border border-red-500/30 mb-2">FULL</span>
+                            <button onClick={(e) => { e.stopPropagation(); alert("Added to waitlist! We will notify you if a slot opens up."); }} className="text-[10px] text-[var(--text-main)] bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-full z-20 font-bold shadow-lg transition-colors border border-zinc-600">Join Waitlist</button>
                          </div>
                       )}
                       
-                      <span className="text-zinc-500 font-medium text-sm mb-2 group-hover:text-emerald-400 transition-colors">
+                      <span className="text-[var(--text-dim)] font-medium text-sm mb-2 group-hover:text-emerald-400 transition-colors">
                         {format(date, 'EEEE')}
                       </span>
-                      <span className="text-4xl font-black text-zinc-200 group-hover:text-white transition-colors">
+                      <span className="text-4xl font-black text-zinc-200 group-hover:text-[var(--text-main)] transition-colors">
                         {format(date, 'dd')}
                       </span>
-                      <span className="text-zinc-500 text-xs mt-1 font-medium group-hover:text-zinc-400 transition-colors">
+                      <span className="text-[var(--text-dim)] text-xs mt-1 font-medium group-hover:text-zinc-400 transition-colors">
                         {format(date, 'MMM')}
                       </span>
                       {isToday(date) && (
@@ -363,14 +366,14 @@ export default function BookingFlow() {
                       className={`relative overflow-hidden p-6 rounded-2xl text-left transition-all border
                         ${slot.available 
                           ? 'glass-panel hover:border-emerald-500/40 hover:bg-zinc-800/80 cursor-pointer group' 
-                          : 'bg-zinc-900/40 border-white/5 opacity-50 cursor-not-allowed'}
+                          : 'bg-[var(--bg-card)]/40 border-[var(--border-main)] opacity-50 cursor-not-allowed'}
                       `}
                     >
                       <div className={`absolute top-4 right-4 w-2 h-2 rounded-full ${slot.available ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-red-500/50'}`}></div>
                       
                       <div className="flex items-center gap-3 mb-2">
                         <Clock className={`w-5 h-5 ${slot.available ? 'text-zinc-100 group-hover:text-emerald-400' : 'text-zinc-600'} transition-colors`} />
-                        <span className={`text-xl font-bold tracking-tight ${slot.available ? 'text-white' : 'text-zinc-600'}`}>
+                        <span className={`text-xl font-bold tracking-tight ${slot.available ? 'text-[var(--text-main)]' : 'text-zinc-600'}`}>
                           {slot.time.split(' ')[0]}
                         </span>
                         <span className={`text-sm font-medium ${slot.available ? 'text-emerald-400/80' : 'text-zinc-700'}`}>
@@ -405,11 +408,19 @@ export default function BookingFlow() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                     
                     {/* Patient Type */}
-                    <div className="md:col-span-2 flex items-center justify-between p-4 bg-zinc-950/50 border border-white/10 rounded-xl">
+                    <div className="md:col-span-2 flex items-center justify-between p-4 bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl">
                        <span className="text-sm font-bold text-zinc-300">Are you a new patient?</span>
                        <div className="flex gap-2">
-                          <button type="button" onClick={() => setFormData({...formData, isNewPatient: true})} className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${formData.isNewPatient ? 'bg-emerald-500 text-zinc-950' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}>Yes, I am new</button>
-                          <button type="button" onClick={() => setFormData({...formData, isNewPatient: false})} className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${!formData.isNewPatient ? 'bg-blue-500 text-zinc-950' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}>No, returning</button>
+                          <button type="button" onClick={() => setFormData({...formData, isNewPatient: true})} className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${formData.isNewPatient ? 'bg-emerald-500 text-zinc-950' : 'bg-zinc-800 text-zinc-400 hover:text-[var(--text-main)]'}`}>Yes, I am new</button>
+                          <button type="button" onClick={() => setFormData({...formData, isNewPatient: false})} className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${!formData.isNewPatient ? 'bg-blue-500 text-zinc-950' : 'bg-zinc-800 text-zinc-400 hover:text-[var(--text-main)]'}`}>No, returning</button>
+                       </div>
+                    </div>
+
+                    <div className="md:col-span-2 flex items-center justify-between p-4 bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl">
+                       <span className="text-sm font-bold text-zinc-300">Who is this appointment for?</span>
+                       <div className="flex gap-2">
+                          <button type="button" onClick={() => setFormData({...formData, bookingFor: 'self'})} className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${formData.bookingFor === 'self' ? 'bg-purple-500 text-zinc-950' : 'bg-zinc-800 text-zinc-400 hover:text-[var(--text-main)]'}`}>Myself</button>
+                          <button type="button" onClick={() => setFormData({...formData, bookingFor: 'dependent'})} className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${formData.bookingFor === 'dependent' ? 'bg-amber-500 text-zinc-950' : 'bg-zinc-800 text-zinc-400 hover:text-[var(--text-main)]'}`}>Dependent</button>
                        </div>
                     </div>
 
@@ -420,7 +431,7 @@ export default function BookingFlow() {
                         type="text" 
                         value={formData.name}
                         onChange={e => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-zinc-950/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
+                        className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl px-4 py-3 text-[var(--text-main)] placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
                         placeholder="John Doe"
                       />
                     </div>
@@ -432,7 +443,7 @@ export default function BookingFlow() {
                         type="tel" 
                         value={formData.phone}
                         onChange={e => setFormData({...formData, phone: e.target.value})}
-                        className="w-full bg-zinc-950/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
+                        className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl px-4 py-3 text-[var(--text-main)] placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
                         placeholder="+1 (555) 000-0000"
                       />
                     </div>
@@ -444,7 +455,7 @@ export default function BookingFlow() {
                         type="email" 
                         value={formData.email}
                         onChange={e => setFormData({...formData, email: e.target.value})}
-                        className="w-full bg-zinc-950/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
+                        className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl px-4 py-3 text-[var(--text-main)] placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
                         placeholder="john@example.com"
                       />
                     </div>
@@ -454,7 +465,7 @@ export default function BookingFlow() {
                       <select 
                         value={formData.insurance}
                         onChange={e => setFormData({...formData, insurance: e.target.value})}
-                        className="w-full bg-zinc-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium appearance-none"
+                        className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl px-4 py-3 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium appearance-none"
                       >
                          <option value="" disabled>Select Provider</option>
                          {INSURANCES.map(i => <option key={i} value={i}>{i}</option>)}
@@ -468,13 +479,13 @@ export default function BookingFlow() {
                         rows={2}
                         value={formData.reason}
                         onChange={e => setFormData({...formData, reason: e.target.value})}
-                        className="w-full bg-zinc-950/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all resize-none font-medium"
+                        className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl px-4 py-3 text-[var(--text-main)] placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all resize-none font-medium"
                         placeholder="Please describe your primary symptoms and duration..."
                       />
                     </div>
                   </div>
 
-                  <div className="pt-4 relative z-10 border-t border-white/5">
+                  <div className="pt-4 relative z-10 border-t border-[var(--border-main)]">
                      <div className="flex items-start gap-3 mb-6 bg-blue-500/5 p-4 rounded-xl border border-blue-500/10">
                         <ShieldCheck className="w-6 h-6 text-blue-400 flex-shrink-0" />
                         <p className="text-xs text-blue-200/70">Your health information is secure and encrypted. By concluding this booking, you agree to our clinic's No-Show policy which may incur a $25 fee if not cancelled within 24 hours.</p>
@@ -501,8 +512,8 @@ export default function BookingFlow() {
               </form>
 
                {/* Live Ticket Preview Sidebar */}
-               <div className="hidden lg:block sticky top-24 pl-4 border-l border-white/5">
-                  <div className="flex items-center gap-2 mb-4 justify-center text-zinc-500 font-bold text-sm uppercase tracking-widest">
+               <div className="hidden lg:block sticky top-24 pl-4 border-l border-[var(--border-main)]">
+                  <div className="flex items-center gap-2 mb-4 justify-center text-[var(--text-dim)] font-bold text-sm uppercase tracking-widest">
                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                      Live Ticket Preview
                   </div>
