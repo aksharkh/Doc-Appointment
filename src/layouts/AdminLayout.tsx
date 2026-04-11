@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Calendar as CalendarIcon, Users, Settings, LogOut, Activity, Pill } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, Users, Settings, LogOut, Activity } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
 import ThemeToggle from '../components/ThemeToggle';
 const navItems = [

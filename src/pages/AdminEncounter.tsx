@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Stethoscope, HeartPulse, Pill, BotMessageSquare, Save, CheckCircle2, Activity, Beaker, Clock, Loader2, FileText, MessageSquare, CalendarPlus, FileDown } from 'lucide-react';
+import { ArrowLeft, Stethoscope, HeartPulse, Pill, BotMessageSquare, Save, CheckCircle2, Activity, Beaker, Clock, Loader2, FileText, MessageSquare, FileDown } from 'lucide-react';
 import { useBookingStore } from '../stores/useBookingStore';
 import type { BookingData, Prescription } from '../stores/useBookingStore';
 
@@ -41,7 +41,7 @@ export default function AdminEncounter() {
   const [chatMessages, setChatMessages] = useState<{sender: string, text: string, time: string}[]>([
       { sender: 'System', text: 'Encounter started. Pharmacy is online.', time: new Date().toLocaleTimeString() }
   ]);
-  const [scheduleFollowUp, setScheduleFollowUp] = useState(false);
+  const scheduleFollowUp = false;
 
   // Timer state
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
